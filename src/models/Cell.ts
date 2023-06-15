@@ -4,11 +4,11 @@ export class Cell {
     private isEmpty: boolean;
     private color: number | undefined;
 
-    constructor(x: number,y: number,isEmpty: boolean,color: number | undefined){
+    constructor(x: number,y: number,isEmpty: boolean){
         this.x = x;
         this.y = y;
         this.isEmpty = isEmpty;
-        this.color = color;
+        this.color = undefined;
     }
 
     colorEmpty(){
@@ -16,6 +16,6 @@ export class Cell {
             this.color = 0x00FF00;
             return;
         }
-        this.color = 0xFF0000;
+        this.color = 0xff00ff;
     }    
 }

@@ -37,13 +37,8 @@ class MyScene extends Phaser.Scene {
         // Calculer les coordonnées de la cellule
         let x = startX + i * cellSize;
         let y = startY + j * cellSize;
-        let cell;
 
-        if(i % 2 === 0 && j % 3 === 0){
-          cell = new Cell(x, y,true,undefined);
-        }else{
-          cell = new Cell(x, y,false,undefined);
-        }  
+        let cell = new Cell(x,y,false)  
         
         // Créer une instance de la classe Cell pour représenter la cellule
         
@@ -53,8 +48,10 @@ class MyScene extends Phaser.Scene {
         if(!!cell['color']){
           graphics.fillStyle(cell['color'])
         }
-        graphics.fillRect(x,y,50,50)
-        
+        // graphics.fillRect(x,y,50,50)
+        graphics.lineStyle(2, colorLine);
+        graphics.strokeRect(x, y, cellSize, cellSize);
+
         // Ajouter la cellule à la grille
         row.push(cell);
       }
