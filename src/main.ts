@@ -1,9 +1,10 @@
 import 'phaser';
+import { MenuScene } from './menu';
 import { Cell } from './models/Cell';
 
 
 
-class MyScene extends Phaser.Scene {
+export class MyScene extends Phaser.Scene {
   private gridAlly: Array<Cell[]> = [];
   private gridEnemy: Array<Cell[]> = [];
   private gridSize = 8;
@@ -27,7 +28,7 @@ class MyScene extends Phaser.Scene {
   private gameArea(grid: Array<Cell[]>, startX:number, startY:number,colorLine:any){
     let gridSize = 8;
     let cellSize = 50
-
+    
     grid = [];
     for (let i = 0; i < gridSize; i++) {
       
@@ -56,16 +57,17 @@ class MyScene extends Phaser.Scene {
         row.push(cell);
       }
       grid.push(row);
+    
+      
     }
   }
 }
-
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 1500,
     height: 1000,
-    scene: MyScene
+    scene: [MenuScene,MyScene]
   };
 
 
