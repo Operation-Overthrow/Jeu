@@ -1,3 +1,4 @@
+import { MyScene } from "../main";
 export class Cell {
     private x: number;
     private y: number;

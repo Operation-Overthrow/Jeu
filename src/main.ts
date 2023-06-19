@@ -6,11 +6,17 @@ import { Core } from './models/Core';
 
 
 export class MyScene extends Phaser.Scene {
-  private gridAlly: Array<Cell[]> = [];
-  private gridEnemy: Array<Cell[]> = [];
-  private CoreAlly!: Core = new Core(10,4,4);
   private gridSize = 8;
   private cellSize = 50;
+  private gridAlly: Array<Cell[]> = [];
+  private gridEnemy: Array<Cell[]> = [];
+  private CoreAlly: Core = new Core(10,4,4);
+
+
+  get getGridSize(){
+    return this.gridSize;
+  }
+
   constructor() {
     super('my-scene');
   }
@@ -27,6 +33,8 @@ export class MyScene extends Phaser.Scene {
   update() {
     
   }
+
+
   private gameArea(grid: Array<Cell[]>, startX:number, startY:number,colorLine:any){
     let gridSize = 8;
     let cellSize = 50;
