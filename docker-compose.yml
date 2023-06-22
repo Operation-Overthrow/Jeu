@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  operation_overthrow_front:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile
+    image: operation_overthrow_front:latest
+    container_name: operation_overthrow_front
+    restart: always
+    volumes:
+      - .:/app:rw
+    tty: true
+    ports:
+      - "5173:5173"
+    networks:
+      - operation_overthrow_network
+
+networks:
+  operation_overthrow_network:  
+    external: true
