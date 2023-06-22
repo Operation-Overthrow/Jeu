@@ -1,14 +1,22 @@
 import 'phaser';
 import { MenuScene } from './menu';
 import { Cell } from './models/Cell';
+import { Core } from './models/Core';
 
 
 
 export class MyScene extends Phaser.Scene {
-  private gridAlly: Array<Cell[]> = [];
-  private gridEnemy: Array<Cell[]> = [];
   private gridSize = 8;
   private cellSize = 50;
+  private gridAlly: Array<Cell[]> = [];
+  private gridEnemy: Array<Cell[]> = [];
+  private CoreAlly: Core = new Core(10,4,4);
+
+
+  get getGridSize(){
+    return this.gridSize;
+  }
+
   constructor() {
     super('my-scene');
   }
@@ -25,10 +33,12 @@ export class MyScene extends Phaser.Scene {
   update() {
     
   }
+
+
   private gameArea(grid: Array<Cell[]>, startX:number, startY:number,colorLine:any){
     let gridSize = 8;
-    let cellSize = 50
-    
+    let cellSize = 50;
+    let cell;
     grid = [];
     for (let i = 0; i < gridSize; i++) {
       
@@ -38,27 +48,43 @@ export class MyScene extends Phaser.Scene {
         // Calculer les coordonnées de la cellule
         let x = startX + i * cellSize;
         let y = startY + j * cellSize;
-
-        let cell = new Cell(x,y,false)  
+        if (
+          (i <= this.CoreAlly['x'] && i + 1 >= this.CoreAlly['x']) &&
+          (j <= this.CoreAlly['y'] && j + 1 >= this.CoreAlly['y'])
+        ) {
+          cell = new Cell(x, y, false);
+        } else {
+          cell = new Cell(x, y, true);
+        }
         
-        // Créer une instance de la classe Cell pour représenter la cellule
-        
+        cell.colorEmpty();
         let graphics = this.add.graphics();
         // Dessiner la cellule
-        cell.colorEmpty();
-        if(!!cell['color']){
-          graphics.fillStyle(cell['color'])
+        if (!!cell['color']) {
+          graphics.fillStyle(cell['color']);
+          graphics.fillRect(x, y, cellSize, cellSize);
         }
-        // graphics.fillRect(x,y,50,50)
-        graphics.lineStyle(2, colorLine);
-        graphics.strokeRect(x, y, cellSize, cellSize);
+        // Dessiner le cercle inscrit
+      // Dessiner le cercle inscrit dans le grand rectangle 2x2
+      if (
+        i === this.CoreAlly['x'] &&
+        j === this.CoreAlly['y']
+      ) {
+        const centerX = x + cellSize -50
+        const centerY = y + cellSize  -50
+        const radius = cellSize;
+        graphics.fillStyle(0xffffff); // Couleur du cercle (noir dans cet exemple)
+        graphics.fillCircle(centerX, centerY, radius);
+      }
 
+      graphics.lineStyle(2, colorLine);
+      graphics.strokeRect(x, y, cellSize, cellSize);
         // Ajouter la cellule à la grille
         row.push(cell);
       }
       grid.push(row);
-    
-      
+
+
     }
   }
 }
