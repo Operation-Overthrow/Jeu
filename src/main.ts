@@ -2,6 +2,7 @@ import 'phaser';
 import { MenuScene } from './menu';
 import { Cell } from './models/Cell';
 import { Core } from './models/Core';
+import { Bullet } from './models/Bullet';
 
 
 
@@ -10,66 +11,67 @@ export class MyScene extends Phaser.Scene {
   private cellSize = 50;
   private gridAlly: Array<Cell[]> = [];
   private gridEnemy: Array<Cell[]> = [];
-  private CoreAlly: Core = new Core(10,4,4);
+  private CoreAlly: Core = new Core(10, 4, 4);
   private graphics!: Phaser.GameObjects.Graphics;
   private circle!: Phaser.GameObjects.Arc & { body: Phaser.Physics.Arcade.Body };
   private trajectoryPoints: Phaser.Math.Vector2[] = [];
+  private bulletPhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private corePhysic!:Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
 
 
-  get getGridSize(){
+
+  get getGridSize() {
     return this.gridSize;
-  }  constructor() {
-        super('my-scene');
+  } constructor() {
+    super('my-scene');
+  }
+
+  preload() {
+    this.load.image('bullet','assets/bullet.png');
+    this.load.image('core','assets/reactor1.png')
+  }
+
+  create() {
+    this.gameArea(this.gridAlly, 100, 600 - this.gridSize * this.cellSize, 0xffffff);
+    this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
+    this.generateCore();
+    this.input.on('pointerdown', (pointer: PointerEvent) => {
+      this.generateBullet(pointer)
+      console.log(this.bulletPhysic,this.corePhysic);
+      this.physics.add.collider(this.corePhysic, this.bulletPhysic, this.handleBulletCollision, undefined, this);
+    });
+    
+    // Ajoute les graphiques de débogage
+    this.graphics = this.add.graphics();
+  }
+
+  update() {
+    // Efface le tracé précédent
+    this.graphics.clear();
+
+    // Ajoute la position actuelle du cercle aux points de trajectoire
+    if (this.circle) {
+      this.trajectoryPoints.push(new Phaser.Math.Vector2(this.circle.x, this.circle.y));
     }
 
-    preload() {
-        // Préchargement des ressources si nécessaire
+    // Dessine le tracé de la trajectoire
+    this.graphics.lineStyle(2, 0x00ff00, 1);
+    for (let i = 1; i < this.trajectoryPoints.length; i++) {
+      const startPoint = this.trajectoryPoints[i - 1];
+      const endPoint = this.trajectoryPoints[i];
+      this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
-
-    create() {
-      this.gameArea(this.gridAlly,100,600 - this.gridSize * this.cellSize,0xffffff);
-    this.gameArea(this.gridEnemy,900,600  - this.gridSize * this.cellSize,0xffffff);
-        this.input.on('pointerdown', (pointer: PointerEvent) => {
-            // Crée un cercle blanc
-            const circle = this.add.circle(pointer.x, pointer.y, 5, 0xff0066);
-            this.physics.add.existing(circle);
-            this.circle = circle as Phaser.GameObjects.Arc & { body: Phaser.Physics.Arcade.Body };
-            this.circle.body.velocity.x = 200;
-            this.circle.body.velocity.y = -200;
-
-            // Réinitialise le tableau des points de trajectoire
-            this.trajectoryPoints = [];
-        });
-
-        // Ajoute les graphiques de débogage
-        this.graphics = this.add.graphics();
-    }
-
-    update() {
-        // Efface le tracé précédent
-        this.graphics.clear();
-
-        // Ajoute la position actuelle du cercle aux points de trajectoire
-        if (this.circle) {
-            this.trajectoryPoints.push(new Phaser.Math.Vector2(this.circle.x, this.circle.y));
-        }
-
-        // Dessine le tracé de la trajectoire
-        this.graphics.lineStyle(2, 0x00ff00, 1);
-        for (let i = 1; i < this.trajectoryPoints.length; i++) {
-            const startPoint = this.trajectoryPoints[i - 1];
-            const endPoint = this.trajectoryPoints[i];
-            this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
-        }
-    }
+  }
 
 
-  private gameArea(grid: Array<Cell[]>, startX:number, startY:number,colorLine:any){
+  private gameArea(grid: Array<Cell[]>, startX: number, startY: number, colorLine: any) {
+    
     let gridSize = 8;
     let cellSize = 50;
     let cell;
     grid = [];
+    this.CoreAlly = new Core(10,4,4)
     for (let i = 0; i < gridSize; i++) {
 
       let row = [];
@@ -94,21 +96,20 @@ export class MyScene extends Phaser.Scene {
           graphics.fillStyle(cell['color']);
           graphics.fillRect(x, y, cellSize, cellSize);
         }
-        // Dessiner le cercle inscrit
-      // Dessiner le cercle inscrit dans le grand rectangle 2x2
-      if (
-        i === this.CoreAlly['x'] &&
-        j === this.CoreAlly['y']
-      ) {
-        const centerX = x + cellSize -50
-        const centerY = y + cellSize  -50
-        const radius = cellSize;
-        graphics.fillStyle(0xffffff); // Couleur du cercle (noir dans cet exemple)
-        graphics.fillCircle(centerX, centerY, radius);
-      }
+        // Dessiner le cercle inscrit dans le grand rectangle 2x2
+        if (
+          i === this.CoreAlly['x'] &&
+          j === this.CoreAlly['y']
+        ) {
+          const centerX = x + cellSize - 50
+          const centerY = y + cellSize - 50
+          const radius = cellSize;
+          graphics.fillStyle(0xffffff); // Couleur du cercle (noir dans cet exemple)
+          graphics.fillCircle(centerX, centerY, radius);
+        }
 
-      graphics.lineStyle(2, colorLine);
-      graphics.strokeRect(x, y, cellSize, cellSize);
+        graphics.lineStyle(2, colorLine);
+        graphics.strokeRect(x, y, cellSize, cellSize);
         // Ajouter la cellule à la grille
         row.push(cell);
       }
@@ -117,19 +118,37 @@ export class MyScene extends Phaser.Scene {
 
     }
   }
+
+  generateBullet(pointer: PointerEvent) {
+    let bullet = new Bullet(pointer.x, pointer.y, 300);
+    let bulletPhysic = this.physics.add.sprite(bullet.x, bullet.y, 'bullet');
+    bulletPhysic.setVelocity(bullet.velocity, -bullet.velocity);
+    this.bulletPhysic = bulletPhysic; // Store a reference to the bullet sprite
+  }
+  
+  generateCore() {
+    let core = new Core(400, 800, 500);
+    let corePhysic = this.physics.add.sprite(core.x, core.y, 'core');
+    corePhysic.body.allowGravity = false;
+    this.corePhysic = corePhysic;
+  }
+
+  private handleBulletCollision() {
+    console.log('Collision entre la balle et le cœur');
+  }
 }
 
 const config: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
-    width: 1500,
-    height: 1000,
-    scene: [MenuScene,MyScene],
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 200 } // Définit la gravité vers le bas (y positif)
-        }
+  type: Phaser.AUTO,
+  width: 1500,
+  height: 1000,
+  scene: [MenuScene, MyScene],
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 200 } // Définit la gravité vers le bas (y positif)
     }
+  }
 };
 
 const game = new Phaser.Game(config);
