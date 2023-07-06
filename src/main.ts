@@ -3,6 +3,7 @@ import { MenuScene } from './menu';
 import { Cell } from './models/Cell';
 import { Core } from './models/Core';
 import { Bullet } from './models/Bullet';
+import { Turret } from './models/Turret';
 
 
 
@@ -27,7 +28,8 @@ export class MyScene extends Phaser.Scene {
 
   preload() {
     this.load.image('bullet','assets/test.png');
-    this.load.image('core','assets/reactor1.png')
+    this.load.image('core','assets/reactor1.png');
+    this.load.image('tourelle','assets/tourelle1.png');
   }
 
   create() {
@@ -36,6 +38,7 @@ export class MyScene extends Phaser.Scene {
     this.bulletsGroup = this.physics.add.group();
 
     this.generateCore();
+    this.generateTurret();
     this.input.on('pointerdown', (pointer: PointerEvent) => {
       this.generateBullet(pointer)
       console.log(this.bulletPhysic,this.corePhysic);
@@ -63,6 +66,67 @@ export class MyScene extends Phaser.Scene {
       this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
   }
+
+  generateBullet(pointer: PointerEvent) {
+    let bullet = new Bullet(pointer.x, pointer.y, 300);
+    let bulletPhysic = this.bulletsGroup.create(bullet.x, bullet.y, 'bullet');
+    bulletPhysic.setVelocity(bullet.velocity, -bullet.velocity);
+  }
+  
+  generateCore() {
+    let core = this.CoreAlly;
+    let corePhysic = this.physics.add.sprite(core.x, core.y, 'core');
+    corePhysic.body.allowGravity = false;
+    corePhysic.body.immovable = true;
+    this.corePhysic = corePhysic;
+
+    // Ajuster les coordonnées du réacteur pour qu'il soit centré sur le cercle blanc
+    const centerX = this.corePhysic.x + this.cellSize / 2;
+    const centerY = this.corePhysic.y + this.cellSize / 2;
+
+    // Placer le réacteur à l'endroit du cercle blanc
+    this.corePhysic.setPosition(centerX, centerY);
+
+    // Ajuster la profondeur du réacteur pour le faire ressortir visuellement
+    this.corePhysic.setDepth(1);
+  }
+
+  generateTurret(){
+    let turret = new Turret(10,475,275);
+    let turretPhysic = this.physics.add.sprite(turret.x,turret.y,'tourelle');
+    turretPhysic.body.allowGravity = false;
+    turretPhysic.body.immovable = true;
+    turretPhysic.setDepth(1);
+  }
+
+  private handleBulletCollision(core: Phaser.GameObjects.GameObject, bullet: Phaser.GameObjects.GameObject) {
+    console.log('Collision entre la balle et le cœur');
+    this.CoreAlly.reduceHP(2);
+    console.log(this.CoreAlly);
+    
+    if (this.CoreAlly.hp === 0) {
+      console.log('gameOver');
+    }
+  
+    bullet.destroy();
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   private gameArea(grid: Array<Cell[]>, startX: number, startY: number, colorLine: any) {
@@ -117,43 +181,6 @@ export class MyScene extends Phaser.Scene {
 
     }
   }
-
-  generateBullet(pointer: PointerEvent) {
-    let bullet = new Bullet(pointer.x, pointer.y, 300);
-    let bulletPhysic = this.bulletsGroup.create(bullet.x, bullet.y, 'bullet');
-    bulletPhysic.setVelocity(bullet.velocity, -bullet.velocity);
-  }
-  
-  generateCore() {
-    let core = this.CoreAlly;
-    let corePhysic = this.physics.add.sprite(core.x, core.y, 'core');
-    corePhysic.body.allowGravity = false;
-    corePhysic.body.immovable = true;
-    this.corePhysic = corePhysic;
-
-    // Ajuster les coordonnées du réacteur pour qu'il soit centré sur le cercle blanc
-    const centerX = this.corePhysic.x + this.cellSize / 2;
-    const centerY = this.corePhysic.y + this.cellSize / 2;
-
-    // Placer le réacteur à l'endroit du cercle blanc
-    this.corePhysic.setPosition(centerX, centerY);
-
-    // Ajuster la profondeur du réacteur pour le faire ressortir visuellement
-    this.corePhysic.setDepth(1);
-  }
-
-  private handleBulletCollision(core: Phaser.GameObjects.GameObject, bullet: Phaser.GameObjects.GameObject) {
-    console.log('Collision entre la balle et le cœur');
-    this.CoreAlly.reduceHP(2);
-    console.log(this.CoreAlly);
-    
-    if (this.CoreAlly.hp === 0) {
-      console.log('gameOver');
-    }
-  
-    bullet.destroy();
-  }
-  
 }
 
 const config: Phaser.Types.Core.GameConfig = {
