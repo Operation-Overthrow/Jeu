@@ -1,9 +1,8 @@
-import { MyScene } from "../main";
 export class Cell {
     private x: number;
     private y: number;
     private isEmpty: boolean;
-    private color: number | undefined;
+    public color: number | undefined;
 
     constructor(x: number,y: number,isEmpty: boolean){
         this.x = x;

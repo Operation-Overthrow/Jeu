@@ -1,7 +1,7 @@
 export class Core {
-    private hp: number;
-    private x: number;
-    private y: number;
+    public hp: number;
+    public x: number;
+    public y: number;
     
     constructor(hp:number,x:number,y:number){
         this.hp = hp;
@@ -9,5 +9,7 @@ export class Core {
         this.y = y;
     }
 
-
+    reduceHP(hp:number){
+        this.hp -= hp
+    }
 }
