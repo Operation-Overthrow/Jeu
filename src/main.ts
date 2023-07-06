@@ -4,6 +4,7 @@ import { Cell } from './models/Cell';
 import { Core } from './models/Core';
 import { Bullet } from './models/Bullet';
 import { Turret } from './models/Turret';
+import { GameOverScene } from './gameover';
 
 
 
@@ -24,6 +25,10 @@ export class MyScene extends Phaser.Scene {
     return this.gridSize;
   } constructor() {
     super('my-scene');
+  }
+
+  init(data) {
+    this.CoreAlly.hp = 10;
   }
 
   preload() {
@@ -104,8 +109,8 @@ export class MyScene extends Phaser.Scene {
     this.CoreAlly.reduceHP(2);
     console.log(this.CoreAlly);
     
-    if (this.CoreAlly.hp === 0) {
-      console.log('gameOver');
+    if (this.CoreAlly.hp <= 0) {
+      this.scene.start('GameOverScene');
     }
   
     bullet.destroy();
@@ -187,7 +192,7 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 1500,
   height: 1000,
-  scene: [MenuScene, MyScene],
+  scene: [MenuScene, MyScene, GameOverScene],
   physics: {
     default: 'arcade',
     arcade: {
