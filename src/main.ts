@@ -30,10 +30,6 @@ export class MyScene extends Phaser.Scene {
     super('my-scene');
   }
 
-  init(data) {
-    this.CoreAlly.hp = 10;
-  }
-
   preload() {
     this.load.image('bullet', 'assets/test.png');
     this.load.image('core', 'assets/reactor1.png');
@@ -41,6 +37,14 @@ export class MyScene extends Phaser.Scene {
   }
 
   create() {
+      
+    // vider la scène, et la tourelle
+    this.trajectoryPoints = [];
+    this.turrets = [];
+    this.CoreAlly.hp = 10;
+    this.CoreEnnemy.hp = 10;
+
+  
     this.gameArea(this.gridAlly, 100, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.bulletsGroup = this.physics.add.group();
@@ -94,6 +98,7 @@ export class MyScene extends Phaser.Scene {
 
     bulletPhysic.setVelocity(xPosition * 20, yPosition * 20);
   }
+
   generateCore(name: string) {
     let currentCore = name === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
     let corePhysicLocal = this.physics.add.sprite(currentCore.x, currentCore.y, 'core');
@@ -133,8 +138,9 @@ export class MyScene extends Phaser.Scene {
     let selectedCore = core['name'] === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
     console.log('Collision entre la balle et le cœur - ' + core['name']);
     selectedCore.reduceHP(2);
+    console.log(selectedCore)
 
-    if (selectedCore.hp === 0) {
+    if (selectedCore.hp <= 0) {
       this.scene.start('GameOverScene');
     }
 
