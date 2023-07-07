@@ -40,8 +40,8 @@ export class MyScene extends Phaser.Scene {
     this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.bulletsGroup = this.physics.add.group();
 
-    this.generateCore('coreAlly', this.corePhysic);
-    this.generateCore('coreEnnemy', this.corePhysicEnnemy);
+    this.generateCore('coreAlly');
+    this.generateCore('coreEnnemy');
     this.generateTurret();
     this.input.on('pointerdown', (pointer: PointerEvent) => {
       this.turrets.forEach(turret => {
@@ -131,6 +131,7 @@ export class MyScene extends Phaser.Scene {
 
     if (selectedCore.hp === 0) {
       console.log('gameOver - ' + core['name'] + ' a perdu !');
+    }
 
     bullet.destroy();
   }
