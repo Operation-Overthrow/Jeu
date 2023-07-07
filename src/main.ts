@@ -13,12 +13,14 @@ export class MyScene extends Phaser.Scene {
   private cellSize = 50;
   private gridAlly: Array<Cell[]> = [];
   private gridEnemy: Array<Cell[]> = [];
-  private CoreAlly: Core = new Core(10, 1075, 375);
+  private CoreAlly: Core = new Core(10, 275, 375);
+  private CoreEnnemy: Core = new Core(10, 1075, 375);
   private graphics!: Phaser.GameObjects.Graphics;
   private circle!: Phaser.GameObjects.Arc & { body: Phaser.Physics.Arcade.Body };
   private trajectoryPoints: Phaser.Math.Vector2[] = [];
   private bulletPhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  private corePhysic!:Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private corePhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private corePhysicEnnemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
   get getGridSize() {
     return this.gridSize;
@@ -27,9 +29,9 @@ export class MyScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('bullet','assets/test.png');
-    this.load.image('core','assets/reactor1.png');
-    this.load.image('tourelle','assets/tourelle1.png');
+    this.load.image('bullet', 'assets/test.png');
+    this.load.image('core', 'assets/reactor1.png');
+    this.load.image('tourelle', 'assets/tourelle1.png');
   }
 
   create() {
@@ -37,14 +39,16 @@ export class MyScene extends Phaser.Scene {
     this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.bulletsGroup = this.physics.add.group();
 
-    this.generateCore();
+    this.generateCore('coreAlly', this.corePhysic);
+    this.generateCore('coreEnnemy', this.corePhysicEnnemy);
     this.generateTurret();
     this.input.on('pointerdown', (pointer: PointerEvent) => {
       this.generateBullet(pointer)
-      console.log(this.bulletPhysic,this.corePhysic);
+      console.log(this.bulletPhysic, this.corePhysic);
       this.physics.add.collider(this.corePhysic, this.bulletsGroup, this.handleBulletCollision, undefined, this);
+      this.physics.add.collider(this.corePhysicEnnemy, this.bulletsGroup, this.handleBulletCollision, undefined, this);
     });
-    
+
     // Ajoute les graphiques de débogage
     this.graphics = this.add.graphics();
   }
@@ -72,45 +76,52 @@ export class MyScene extends Phaser.Scene {
     let bulletPhysic = this.bulletsGroup.create(bullet.x, bullet.y, 'bullet');
     bulletPhysic.setVelocity(bullet.velocity, -bullet.velocity);
   }
-  
-  generateCore() {
-    let core = this.CoreAlly;
-    let corePhysic = this.physics.add.sprite(core.x, core.y, 'core');
-    corePhysic.body.allowGravity = false;
-    corePhysic.body.immovable = true;
-    this.corePhysic = corePhysic;
+
+  generateCore(name: string) {
+    let currentCore = name === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
+    let corePhysicLocal = this.physics.add.sprite(currentCore.x, currentCore.y, 'core');
+    corePhysicLocal.setName(name);
+    corePhysicLocal.body.allowGravity = false;
+    corePhysicLocal.body.immovable = true;
+    
 
     // Ajuster les coordonnées du réacteur pour qu'il soit centré sur le cercle blanc
-    const centerX = this.corePhysic.x + this.cellSize / 2;
-    const centerY = this.corePhysic.y + this.cellSize / 2;
+    const centerX = corePhysicLocal.x + this.cellSize / 2;
+    const centerY = corePhysicLocal.y + this.cellSize / 2;
 
     // Placer le réacteur à l'endroit du cercle blanc
-    this.corePhysic.setPosition(centerX, centerY);
+    corePhysicLocal.setPosition(centerX, centerY);
 
     // Ajuster la profondeur du réacteur pour le faire ressortir visuellement
-    this.corePhysic.setDepth(1);
+    corePhysicLocal.setDepth(1);
+
+    if (name === 'coreAlly') {
+      this.corePhysic = corePhysicLocal;
+    } else {
+      this.corePhysicEnnemy = corePhysicLocal;
+    }
   }
 
-  generateTurret(){
-    let turret = new Turret(10,475,275);
-    let turretPhysic = this.physics.add.sprite(turret.x,turret.y,'tourelle');
+  generateTurret() {
+    let turret = new Turret(10, 475, 275);
+    let turretPhysic = this.physics.add.sprite(turret.x, turret.y, 'tourelle');
     turretPhysic.body.allowGravity = false;
     turretPhysic.body.immovable = true;
     turretPhysic.setDepth(1);
   }
 
   private handleBulletCollision(core: Phaser.GameObjects.GameObject, bullet: Phaser.GameObjects.GameObject) {
-    console.log('Collision entre la balle et le cœur');
-    this.CoreAlly.reduceHP(2);
-    console.log(this.CoreAlly);
-    
-    if (this.CoreAlly.hp === 0) {
-      console.log('gameOver');
+    let selectedCore = core['name'] === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
+    console.log('Collision entre la balle et le cœur - ' + core['name']);
+    selectedCore.reduceHP(2);
+
+    if (selectedCore.hp === 0) {
+      console.log('gameOver - ' + core['name'] + ' a perdu !');
     }
-  
+
     bullet.destroy();
   }
-  
+
 
 
 
@@ -130,7 +141,7 @@ export class MyScene extends Phaser.Scene {
 
 
   private gameArea(grid: Array<Cell[]>, startX: number, startY: number, colorLine: any) {
-    
+
     let gridSize = 8;
     let cellSize = 50;
     let cell;
