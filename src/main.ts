@@ -21,6 +21,7 @@ export class MyScene extends Phaser.Scene {
   private bulletPhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysicEnnemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private turrets: Array<Turret> = [];
 
   get getGridSize() {
     return this.gridSize;
@@ -43,10 +44,17 @@ export class MyScene extends Phaser.Scene {
     this.generateCore('coreEnnemy', this.corePhysicEnnemy);
     this.generateTurret();
     this.input.on('pointerdown', (pointer: PointerEvent) => {
-      this.generateBullet(pointer)
-      console.log(this.bulletPhysic, this.corePhysic);
-      this.physics.add.collider(this.corePhysic, this.bulletsGroup, this.handleBulletCollision, undefined, this);
-      this.physics.add.collider(this.corePhysicEnnemy, this.bulletsGroup, this.handleBulletCollision, undefined, this);
+      this.turrets.forEach(turret => {
+        if (
+          (pointer.x >= turret.x - (this.cellSize / 2) && pointer.x <= turret.x + (this.cellSize / 2)) &&
+          (pointer.y >= turret.y - (this.cellSize / 2) && pointer.y <= turret.y + (this.cellSize / 2))
+        ) {
+          this.generateBullet(turret, pointer)
+          console.log(this.bulletPhysic,this.corePhysic);
+          this.physics.add.collider(this.corePhysic, this.bulletsGroup, this.handleBulletCollision, undefined, this);
+          this.physics.add.collider(this.corePhysicEnnemy, this.bulletsGroup, this.handleBulletCollision, undefined, this);
+        }
+      });
     });
 
     // Ajoute les graphiques de débogage
@@ -71,19 +79,23 @@ export class MyScene extends Phaser.Scene {
     }
   }
 
-  generateBullet(pointer: PointerEvent) {
-    let bullet = new Bullet(pointer.x, pointer.y, 300);
+  generateBullet(turret: Turret, pointer: PointerEvent) {
+    let bullet = new Bullet(turret.x, turret.y, 300);
     let bulletPhysic = this.bulletsGroup.create(bullet.x, bullet.y, 'bullet');
-    bulletPhysic.setVelocity(bullet.velocity, -bullet.velocity);
-  }
 
+    // calculer la vélocité de la balle en fonction de la position de la souris par rapport au centre du cercle
+    const xPosition =  turret.x - pointer.x;
+    const yPosition =  turret.y - pointer.y;
+
+    bulletPhysic.setVelocity(xPosition * 20, yPosition * 20);
+  }
   generateCore(name: string) {
     let currentCore = name === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
     let corePhysicLocal = this.physics.add.sprite(currentCore.x, currentCore.y, 'core');
     corePhysicLocal.setName(name);
     corePhysicLocal.body.allowGravity = false;
     corePhysicLocal.body.immovable = true;
-    
+
 
     // Ajuster les coordonnées du réacteur pour qu'il soit centré sur le cercle blanc
     const centerX = corePhysicLocal.x + this.cellSize / 2;
@@ -108,6 +120,8 @@ export class MyScene extends Phaser.Scene {
     turretPhysic.body.allowGravity = false;
     turretPhysic.body.immovable = true;
     turretPhysic.setDepth(1);
+
+    this.turrets.push(turret);
   }
 
   private handleBulletCollision(core: Phaser.GameObjects.GameObject, bullet: Phaser.GameObjects.GameObject) {
@@ -117,7 +131,6 @@ export class MyScene extends Phaser.Scene {
 
     if (selectedCore.hp === 0) {
       console.log('gameOver - ' + core['name'] + ' a perdu !');
-    }
 
     bullet.destroy();
   }
