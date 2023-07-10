@@ -147,6 +147,24 @@ export class MyScene extends Phaser.Scene {
     this.music.volume = 0.1;
   }
 
+  isPointerInSector = (pointerX: number, pointerY:number, centerX: number, centerY: number) => {
+    const angleStart = Phaser.Math.Angle.Between(centerX, centerY, this.trajectoryPoints[0].x, this.trajectoryPoints[0].y);
+    const angleEnd = Phaser.Math.Angle.Between(centerX, centerY, this.trajectoryPoints[this.trajectoryPoints.length - 1].x, this.trajectoryPoints[this.trajectoryPoints.length - 1].y);
+    const pointerAngle = Phaser.Math.Angle.Between(centerX, centerY, pointerX, pointerY);
+
+    // Normalize angles to be between 0 and 2*PI
+    const normalizedStartAngle = Phaser.Math.Wrap(angleStart, 0, Math.PI * 2);
+    const normalizedEndAngle = Phaser.Math.Wrap(angleEnd, 0, Math.PI * 2);
+    const normalizedPointerAngle = Phaser.Math.Wrap(pointerAngle, 0, Math.PI * 2);
+
+    // Check if the pointer angle is between the start and end angles of the sector
+    if (normalizedStartAngle < normalizedEndAngle) {
+      return normalizedPointerAngle >= normalizedStartAngle && normalizedPointerAngle <= normalizedEndAngle;
+    } else {
+      return normalizedPointerAngle >= normalizedStartAngle || normalizedPointerAngle <= normalizedEndAngle;
+    }
+  };
+
   update() {
     // Efface le tracé précédent
     this.graphics.clear();
@@ -220,26 +238,10 @@ export class MyScene extends Phaser.Scene {
       const pointerX = this.input.activePointer.x;
       const pointerY = this.input.activePointer.y;
 
-      const isPointerInSector = (pointerX: number, pointerY:number) => {
-        const angleStart = Phaser.Math.Angle.Between(centerX, centerY, this.trajectoryPoints[0].x, this.trajectoryPoints[0].y);
-        const angleEnd = Phaser.Math.Angle.Between(centerX, centerY, this.trajectoryPoints[this.trajectoryPoints.length - 1].x, this.trajectoryPoints[this.trajectoryPoints.length - 1].y);
-        const pointerAngle = Phaser.Math.Angle.Between(centerX, centerY, pointerX, pointerY);
-
-        // Normalize angles to be between 0 and 2*PI
-        const normalizedStartAngle = Phaser.Math.Wrap(angleStart, 0, Math.PI * 2);
-        const normalizedEndAngle = Phaser.Math.Wrap(angleEnd, 0, Math.PI * 2);
-        const normalizedPointerAngle = Phaser.Math.Wrap(pointerAngle, 0, Math.PI * 2);
-
-        // Check if the pointer angle is between the start and end angles of the sector
-        if (normalizedStartAngle < normalizedEndAngle) {
-          return normalizedPointerAngle >= normalizedStartAngle && normalizedPointerAngle <= normalizedEndAngle;
-        } else {
-          return normalizedPointerAngle >= normalizedStartAngle || normalizedPointerAngle <= normalizedEndAngle;
-        }
-      };
+      
 
       // Check if the pointer is inside the sector
-      const isPointerInsideSector = isPointerInSector(pointerX, pointerY);
+      const isPointerInsideSector = this.isPointerInSector(pointerX, pointerY, centerX, centerY);
       this.isPointerInsideSector = isPointerInsideSector;
 
       console.log(this.isPointerInsideSector);
