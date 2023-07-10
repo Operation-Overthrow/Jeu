@@ -62,6 +62,8 @@ export class MyScene extends Phaser.Scene {
   }
 
   create() {
+    localStorage.removeItem('score');
+
     this.add.image(1500 / 2, 720 / 2, 'background');
     // vider la scène, et la tourelle
     this.turretService = new TurretService(this.physics);
@@ -107,7 +109,7 @@ export class MyScene extends Phaser.Scene {
         if (this.userCooldown > 0) {
           return;
         }
-  
+
         this.userCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
         // Find the clicked turret
         const clickedTurret = this.turretService.turrets.find(turret => {
@@ -243,7 +245,7 @@ export class MyScene extends Phaser.Scene {
       const pointerX = this.input.activePointer.x;
       const pointerY = this.input.activePointer.y;
 
-      
+
 
       // Check if the pointer is inside the sector
       const isPointerInsideSector = this.isPointerInSector(pointerX, pointerY, centerX, centerY);
@@ -341,12 +343,29 @@ export class MyScene extends Phaser.Scene {
     selectedCore.reduceHP(Turret.TURRET_DEFAULT_DAMAGE * 2);
 
     if (selectedCore.hp <= 0) {
-      
+      localStorage.setItem('score', this.calculateScore().toString());
+
       this.music.stop();
       this.scene.start('GameOverScene');
     }
 
     bullet.destroy();
+  }
+  calculateScore() {
+    const VICTORY_BONUS = 1000;
+    const TURRET_BONUS = 100;
+    const HP_BONUS = 100;
+
+    let score = 0;
+
+    if (this.CoreEnnemy.hp <= 0) {
+      score += VICTORY_BONUS;
+    }
+
+    score += this.turrets.filter(turret => !turret.isEnemy).length * TURRET_BONUS;
+    score += this.CoreAlly.hp * HP_BONUS;
+
+    return score;
   }
 
 
