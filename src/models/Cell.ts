@@ -18,4 +18,8 @@ export class Cell {
         }
         this.color = 0xff00ff;
     }    
+
+    updateIsEmpty(isEmpty: boolean){
+        this.isEmpty = isEmpty;
+    }
 }

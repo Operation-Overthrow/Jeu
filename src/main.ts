@@ -8,6 +8,7 @@ import { AIBase } from './ai/interfaces/AIBase';
 import { AIBasic } from './ai/factories/AIBasic';
 import { AIPlayer } from './ai/interfaces/AIPlayer';
 import { BulletService } from './services/bulletService';
+import { WallService } from './services/wallService';
 
 
 
@@ -34,6 +35,9 @@ export class MyScene extends Phaser.Scene {
   private displayCoreEnnemyHealth!: Phaser.GameObjects.Text;
   private displayAiTurretCooldown!: Phaser.GameObjects.Text;
   private displayUserTurretCooldown!: Phaser.GameObjects.Text;
+  private wallService!: WallService;
+  private keyW!: Phaser.Input.Keyboard.Key;
+  private keyT!: Phaser.Input.Keyboard.Key;
   private isPointerInsideSector: boolean = false;
 
   get getGridSize() {
@@ -49,24 +53,46 @@ export class MyScene extends Phaser.Scene {
     this.load.image('tourelle', 'assets/tourelle1.png');
     this.load.image('tourelle_reversed', 'assets/tourelle_reversed1.png');
     this.load.image('dirt', 'assets/dirt1.png');
+    this.load.image('wall', 'assets/brick1.png');
   }
 
   create() {
     this.add.image(1500 / 2, 720 / 2, 'background');
     // vider la scène, et la tourelle
     this.bulletService = new BulletService(this.physics);
+    this.wallService = new WallService(this.physics);
     this.trajectoryPoints = [];
     this.turrets = [];
     this.CoreAlly.hp = 10;
     this.CoreEnnemy.hp = 10;
 
-    this.gameArea(this.gridAlly, 100, 600 - this.gridSize * this.cellSize, 0xffffff);
-    this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
+    this.gameArea('ally', 100, 600 - this.gridSize * this.cellSize, 0xffffff);
+    this.gameArea('ennemy', 900, 600 - this.gridSize * this.cellSize, 0xffffff);
 
     this.generateCore('coreAlly');
     this.generateCore('coreEnnemy');
     this.generateTurret( 475, 275);
     this.generateTurret(925, 275, 'tourelle_reversed', true);
+
+    const updateCellIsEmpty = (turret: Turret, cell: Cell) => {
+      if (turret.x === cell['x'] + 25 && turret.y === cell['y'] + 25) {
+        cell.updateIsEmpty(false);
+      }
+    };
+
+    this.turrets.forEach((turret) => {
+      this.gridAlly.forEach((row) => {
+        row.forEach((cell) => {
+          updateCellIsEmpty(turret, cell);
+        });
+      });
+
+      this.gridEnemy.forEach((row) => {
+        row.forEach((cell) => {
+          updateCellIsEmpty(turret, cell);
+        });
+      });
+    });
 
 
     // Afficher la vie du coeur
@@ -102,13 +128,13 @@ export class MyScene extends Phaser.Scene {
         const selectedTurret = this.turretIsSelected[0];
         if(this.isPointerInsideSector == true){
           this.bulletService.generateBullet(selectedTurret, pointer.x, pointer.y);
-          this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
+          this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService);
         }
         // Clear the selected turret
         this.turretIsSelected.length = 0;
       }
     });
-  
+
 
     // Ajoute les graphiques de débogage
     this.graphics = this.add.graphics();
@@ -116,41 +142,44 @@ export class MyScene extends Phaser.Scene {
     // Ajout de l'IA
     this.aiEnemy = new AIBasic();
     this.aiPlayerEnemy = this.aiEnemy.createAI();
+
+    this.keyW = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.keyT = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.T);
   }
 
   update() {
     // Efface le tracé précédent
     this.graphics.clear();
-  
+
     // Ajoute la position actuelle du cercle aux points de trajectoire
     if (this.circle) {
       this.trajectoryPoints.push(new Phaser.Math.Vector2(this.circle.x, this.circle.y));
     }
-  
+
     // Mettre à jour le texte de la vie des coeurs
     this.displayCoreAllyHealth.setText('Vie du coeur allié : ' + this.CoreAlly.hp);
     this.displayCoreEnnemyHealth.setText('Vie du coeur ennemi : ' + this.CoreEnnemy.hp);
-  
+
     // Mettre à jour le texte du cooldown de l'IA et du joueur
     this.displayAiTurretCooldown.setText('Cooldown IA : ' + (this.aiCooldown > 0 ? Math.round(this.aiCooldown / 60) : 0) + 's');
     this.displayUserTurretCooldown.setText('Cooldown joueur : ' + (this.userCooldown > 0 ? Math.round(this.userCooldown / 60) : 0) + 's');
-  
+
     // Dessine le tracé de la trajectoire
     for (let i = 1; i < this.trajectoryPoints.length; i++) {
       const startPoint = this.trajectoryPoints[i - 1];
       const endPoint = this.trajectoryPoints[i];
       this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
-  
+
     // Check if a turret is selected
     if (this.turretIsSelected.length !== 0) {
       const selectedTurret = this.turretIsSelected[0];
       const centerX = selectedTurret.x;
       const centerY = selectedTurret.y;
-  
+
       // Clear the previous trajectory points
       this.trajectoryPoints = [];
-  
+
       // Generate the trajectory points for the 40-degree arc
       const startAngle = -20;
       const endAngle = 20;
@@ -161,7 +190,7 @@ export class MyScene extends Phaser.Scene {
         const endPointY = centerY + Math.sin(angleInRadians) * (this.cellSize + distanceFromCell);
         this.trajectoryPoints.push(new Phaser.Math.Vector2(endPointX, endPointY));
       }
-  
+
       // Draw the arc trajectory
       this.graphics.clear();
       this.graphics.lineStyle(2, 0xffffff, 1);
@@ -170,23 +199,23 @@ export class MyScene extends Phaser.Scene {
         const endPoint = this.trajectoryPoints[i];
         this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
       }
-  
+
       // Draw line segments from the center of the cell to the endpoints of the arc
       const startSegmentX = centerX;
       const startSegmentY = centerY;
       const endSegmentX = this.trajectoryPoints[0].x;
       const endSegmentY = this.trajectoryPoints[0].y;
-  
+
       this.graphics.lineStyle(2, 0xffffff, 1);
       this.graphics.lineBetween(startSegmentX, startSegmentY, endSegmentX, endSegmentY);
-  
+
       const startSegmentX2 = centerX;
       const startSegmentY2 = centerY;
       const endSegmentX2 = this.trajectoryPoints[this.trajectoryPoints.length - 1].x;
       const endSegmentY2 = this.trajectoryPoints[this.trajectoryPoints.length - 1].y;
-  
+
       this.graphics.lineBetween(startSegmentX2, startSegmentY2, endSegmentX2, endSegmentY2);
-  
+
       // Draw a line segment from the center of the cell to the pointer
       const pointerX = this.input.activePointer.x;
       const pointerY = this.input.activePointer.y;
@@ -214,8 +243,8 @@ export class MyScene extends Phaser.Scene {
       this.isPointerInsideSector = isPointerInsideSector;
 
       console.log(this.isPointerInsideSector);
-      
-     
+
+
       if (isPointerInsideSector) {
         if(pointerX <= this.trajectoryPoints[(this.trajectoryPoints.length-1)/2].x){
           this.graphics.lineBetween(centerX, centerY, pointerX, pointerY);
@@ -224,16 +253,59 @@ export class MyScene extends Phaser.Scene {
     } else {
       this.trajectoryPoints = [];
     }
-  
+
     if (this.aiCooldown <= 0) {
       this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
-      this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
+      this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService);
     }
-  
+
     this.aiCooldown--;
     this.userCooldown--;
+
+
+    if(this.keyW !== null && this.keyW.isDown){
+      let cell: Cell|null = null;
+
+      this.gridAlly.forEach((row) => {
+        row.forEach((currentCell) => {
+          if (
+            (this.input.mousePointer.x >= currentCell['x'] && this.input.mousePointer.x <= currentCell['x'] + this.cellSize) &&
+            (this.input.mousePointer.y >= currentCell['y'] && this.input.mousePointer.y <= currentCell['y'] + this.cellSize)
+          ) {
+            cell = currentCell;
+          }
+        });
+      });
+
+      if (cell !== null && cell['isEmpty']) {
+        let theCell: Cell = cell;
+        this.wallService.generateWall(theCell['x'] + 25, theCell['y'] + 25);
+        theCell.updateIsEmpty(false);
+      }
+    }
+
+    if(this.keyT !== null && this.keyT.isDown){
+      let cell: Cell|null = null;
+
+      this.gridAlly.forEach((row) => {
+        row.forEach((currentCell) => {
+          if (
+            (this.input.mousePointer.x >= currentCell['x'] && this.input.mousePointer.x <= currentCell['x'] + this.cellSize) &&
+            (this.input.mousePointer.y >= currentCell['y'] && this.input.mousePointer.y <= currentCell['y'] + this.cellSize)
+          ) {
+            cell = currentCell;
+          }
+        });
+      });
+
+      if (cell !== null && cell['isEmpty']) {
+        let theCell: Cell = cell;
+        this.generateTurret(theCell['x'] + 25, theCell['y'] + 25, 'tourelle', false);
+        theCell.updateIsEmpty(false);
+      }
+    }
   }
-  
+
 
   generateCore(name: string) {
     let currentCore = name === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
@@ -287,12 +359,17 @@ export class MyScene extends Phaser.Scene {
 
 
 
-  private gameArea(grid: Array<Cell[]>, startX: number, startY: number, colorLine: any) {
-
+  private gameArea(gridName: string = "ally", startX: number, startY: number, colorLine: any) {
     let gridSize = 8;
     let cellSize = 50;
     let cell;
-    grid = [];
+
+    if (gridName === "ally") {
+      this.gridAlly = [];
+    } else {
+      this.gridEnemy = [];
+    }
+
     for (let i = 0; i < gridSize; i++) {
 
       let row = [];
@@ -333,9 +410,11 @@ export class MyScene extends Phaser.Scene {
         // Ajouter la cellule à la grille
         row.push(cell);
       }
-      grid.push(row);
-
-
+      if (gridName === "ally") {
+        this.gridAlly.push(row);
+      } else {
+        this.gridEnemy.push(row);
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Core } from "../../models/Core";
 import { Turret } from "../../models/Turret";
 import { BulletService } from "../../services/bulletService";
+import { WallService } from "../../services/wallService";
 import { AIPlayer } from "../interfaces/AIPlayer";
 
 export class AIPlayerBasic implements AIPlayer {
@@ -14,7 +15,8 @@ export class AIPlayerBasic implements AIPlayer {
     corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     handleBulletCollision: any,
-    scene: Phaser.Scene
+    scene: Phaser.Scene,
+    wallService: WallService
   ): void {
     turrets.forEach((turret) => {
       if (!turret.isEnemy) {
@@ -36,7 +38,7 @@ export class AIPlayerBasic implements AIPlayer {
 
 
       bulletService.generateBullet(turret, positionX, positionY);
-      bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene);  
+      bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene, wallService);  
       // save the current position and current ally core hp
         let currentCoreHp = enemyCore.hp;
         let currentTurretPosition = {

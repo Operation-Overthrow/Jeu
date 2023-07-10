@@ -1,6 +1,7 @@
 import 'phaser';
 import { Bullet } from "../models/Bullet";
 import { Turret } from "../models/Turret";
+import { WallService } from './wallService';
 
 
 export class BulletService {
@@ -27,8 +28,9 @@ export class BulletService {
       }
       
 
-      public addCollision(physics: Phaser.Physics.Arcade.ArcadePhysics, corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, handleBulletCollision: any, phaserScene: Phaser.Scene) {
+      public addCollision(physics: Phaser.Physics.Arcade.ArcadePhysics, corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, handleBulletCollision: any, phaserScene: Phaser.Scene, wallService: WallService) {
         physics.add.collider(corePhysic, this.bulletsGroup, handleBulletCollision, undefined, phaserScene);
         physics.add.collider(corePhysicEnnemy, this.bulletsGroup, handleBulletCollision, undefined, phaserScene);
+        wallService.addCollision(phaserScene, this.bulletsGroup);
       }
 }
