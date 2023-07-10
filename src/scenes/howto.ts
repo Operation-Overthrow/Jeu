@@ -16,7 +16,7 @@ import { game } from '../main';
 
          // Bouton de démarrage
         const returnButton = this.add.rectangle(gameWidth / 2, gameHeight / 2 + 200, 350, 50, 0xffffff).setOrigin(0.5);
-        const buttonText = this.add.text(gameWidth / 2, gameHeight / 2 + 200, 'Retourner au menu', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        this.add.text(gameWidth / 2, gameHeight / 2 + 200, 'Retourner au menu', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
        
         returnButton.setInteractive();
 

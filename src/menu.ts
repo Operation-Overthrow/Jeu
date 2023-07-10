@@ -15,10 +15,10 @@ import { game } from './main';
         const gameWidth: number = Number(game.config.width);
         const gameHeight: number = Number(game.config.height);
         const startButton = this.add.rectangle(gameWidth / 2, gameHeight / 2, 200, 50, 0xffffff).setOrigin(0.5);
-        const buttonText = this.add.text(gameWidth / 2, gameHeight / 2, 'Démarrer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        this.add.text(gameWidth / 2, gameHeight / 2, 'Démarrer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
         
         const howToPlayButton = this.add.rectangle(gameWidth / 2, gameHeight / 2 + 100, 250, 50, 0xffffff).setOrigin(0.5);
-        const howToPlayButtonText = this.add.text(gameWidth / 2, gameHeight / 2 + 100, 'Comment jouer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        this.add.text(gameWidth / 2, gameHeight / 2 + 100, 'Comment jouer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
         
         startButton.setInteractive();
         howToPlayButton.setInteractive();
