@@ -43,11 +43,7 @@ export class AIPlayerBasic implements AIPlayer {
         let currentTurretPosition = {
             x: positionX,
             y: positionY
-        };
-
-        console.log(this.blackList);
-      
-
+        };      
         // Vérifier si le core ennemi a perdu de la vie après 5 secondes
         setTimeout(() => {
             if(enemyCore.hp === currentCoreHp) {

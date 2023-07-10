@@ -11,7 +11,6 @@ import { game } from './main';
         const gameHeight: number = Number(game.config.height);
         // Code de création du menu
         this.add.text(gameWidth / 2, gameHeight / 2 - 100, 'Game Over', { fontSize: '48px'}).setOrigin(0.5);
-        console.log(this.scene);
         
 
          // Bouton de démarrage

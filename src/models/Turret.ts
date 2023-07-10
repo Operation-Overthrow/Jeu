@@ -1,6 +1,6 @@
 export class Turret {
     static readonly TURRET_DEFAULT_COOLDOWN = 360; // 6 secondes
-    static readonly TURRET_VELOCITY = 20;
+    static readonly TURRET_VELOCITY = 2;
 
 
     public hp;
