@@ -24,23 +24,28 @@ export class AIPlayerBasic implements AIPlayer {
   ): void {
     // générer un nombre aléatoire entre 0 et 2
     let action = Math.floor(Math.random() * 3);
-
-    // vérifier si toutes les cellules sont occupées
-    let allCellsOccupied = true;
-    grid.forEach((row) => {
-      row.forEach((cell) => {
-        if (cell['isEmpty']) {
-          allCellsOccupied = false;
+    
+    if (action !== 0) {
+      let allCellsOccupied = true;
+      for (const row of grid) {
+        for (const cell of row) {
+          if (cell['isEmpty']) {
+            allCellsOccupied = false;
+            break;
+          }
         }
-      });
-    });
 
-    // si oui, on peux seulement tirer
-    if (allCellsOccupied) {
-      action = 0;
+        if (!allCellsOccupied) {
+          break;
+        }
+      }
+
+      if (allCellsOccupied) {
+        action = 0;
+      }
     }
 
-    console.log(action);
+    
 
     switch (action) {
       case 0:
@@ -56,12 +61,12 @@ export class AIPlayerBasic implements AIPlayer {
   }
 
   private shotTurret(turrets: Array<Turret>, bulletService: BulletService, cellSize: number, enemyCore: Core, physics: Phaser.Physics.Arcade.ArcadePhysics, corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, handleBulletCollision: any, scene: Phaser.Scene, wallService: WallService) {
-    let isSended = false;
     // mélanger la liste des tourelles
     turrets = turrets.sort(() => Math.random() - 0.5);
-    turrets.forEach((turret) => {
-      if (!turret.isEnemy || isSended) {
-        return;
+    
+    for (const turret of turrets) {
+      if (!turret.isEnemy) {
+        continue;
       }
 
       let hasGoodShot = this.goodShot.length > 0;
@@ -81,7 +86,8 @@ export class AIPlayerBasic implements AIPlayer {
       bulletService.generateBullet(turret, positionX, positionY, true);
       bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene, wallService);  
       
-    });
+      break;
+    }
   }
 
   private buildWall(wallService: WallService, grid: Array<Cell[]>) {
@@ -102,7 +108,7 @@ export class AIPlayerBasic implements AIPlayer {
   }
 
   private buildTurret(turretService: TurretService, scene: Phaser.Scene, grid: Array<Cell[]>) {
-    // Récupérer une position aléatoire dans la grille toto
+    // Récupérer une position aléatoire dans la grille
     let gridX = Math.floor(Math.random() * grid.length);
     let gridY = Math.floor(Math.random() * grid[0].length);
 
