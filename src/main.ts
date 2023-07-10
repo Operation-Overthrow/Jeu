@@ -105,7 +105,7 @@ export class MyScene extends Phaser.Scene {
 
     if (this.aiCooldown <= 0) {
       this.aiCooldown = 360;
-      this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly);
+      this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
     }
     
     this.aiCooldown--;

@@ -9,7 +9,12 @@ export class AIPlayerBasic implements AIPlayer {
     bulletService: BulletService,
     turrets: Array<Turret>,
     cellSize: number,
-    enemyCore: Core
+    enemyCore: Core,
+    physics: Phaser.Physics.Arcade.ArcadePhysics,
+    corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+    corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+    handleBulletCollision: any,
+    scene: Phaser.Scene
   ): void {
     turrets.forEach((turret) => {
       if (!turret.isEnemy) {
@@ -32,6 +37,7 @@ export class AIPlayerBasic implements AIPlayer {
       }
 
       bulletService.generateBullet(turret, positionX, positionY);
+      bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene);  
       // save the current position and current ally core hp
         let currentCoreHp = enemyCore.hp;
         let currentTurretPosition = {
