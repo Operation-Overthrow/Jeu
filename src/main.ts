@@ -21,7 +21,6 @@ export class MyScene extends Phaser.Scene {
   private graphics!: Phaser.GameObjects.Graphics;
   private circle!: Phaser.GameObjects.Arc & { body: Phaser.Physics.Arcade.Body };
   private trajectoryPoints: Phaser.Math.Vector2[] = [];
-  private bulletPhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysicEnnemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private turrets: Array<Turret> = [];
@@ -82,7 +81,7 @@ this.add.image(1500 / 2, 720 / 2, 'background');
         // Find the clicked turret
         const clickedTurret = this.turrets.find(turret => {
           return (
-            !turret.isEnnemy &&
+            !turret.isEnemy &&
             pointer.x >= turret.x - this.cellSize / 2 &&
             pointer.x <= turret.x + this.cellSize / 2 &&
             pointer.y >= turret.y - this.cellSize / 2 &&
@@ -98,7 +97,7 @@ this.add.image(1500 / 2, 720 / 2, 'background');
         // Handle the next action after turret selection
         // For example, generate a bullet or perform another action
         const selectedTurret = this.turretIsSelected[0];
-          this.bulletService.generateBullet(turret, pointer.x, pointer.y);
+          this.bulletService.generateBullet(selectedTurret, pointer.x, pointer.y);
           this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
   
         // Clear the selected turret
@@ -186,8 +185,6 @@ this.add.image(1500 / 2, 720 / 2, 'background');
     } else {
       this.trajectoryPoints = [];
     }
-
-  }
 
     if (this.aiCooldown <= 0) {
       this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
