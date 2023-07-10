@@ -56,7 +56,7 @@ export class MyScene extends Phaser.Scene {
     this.load.image('dirt', 'assets/dirt1.png');
     this.load.image('wall', 'assets/brick1.png');
     this.load.audio('tir', 'assets/tir.mp3');
-    //this.load.audio('audio_background', 'assets/audio-background.mp3');
+    this.load.audio('audio_background', 'assets/audio-background.mp3');
     this.load.audio('explosion', 'assets/explosion.mp3');
     this.load.audio('gameover', 'assets/gameover.mp3');
   }
@@ -141,10 +141,10 @@ export class MyScene extends Phaser.Scene {
     this.keyT = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.T);
 
     // Ajout de la musique de fond
-    // this.music = this.sound.add('audio_background');
-    // this.music.play();
-    // this.music.loop = true;
-    // this.music.volume = 0.1;
+    this.music = this.sound.add('audio_background');
+    this.music.play();
+    this.music.loop = true;
+    this.music.volume = 0.1;
   }
 
   update() {
