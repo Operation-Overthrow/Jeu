@@ -30,7 +30,7 @@ export class MyScene extends Phaser.Scene {
   private aiEnemy!: AIBase;
   private aiPlayerEnemy!: AIPlayer;
   private aiCooldown: number = Turret.TURRET_DEFAULT_COOLDOWN;
-  private userCooldown: number = 0;
+  private userCooldown: number = Turret.TURRET_DEFAULT_COOLDOWN;
   private bulletService!: BulletService;
   private displayCoreAllyHealth!: Phaser.GameObjects.Text;
   private displayCoreEnnemyHealth!: Phaser.GameObjects.Text;
@@ -102,6 +102,11 @@ export class MyScene extends Phaser.Scene {
     this.input.on('pointerdown', (pointer: PointerEvent) => {
       // Check if any turret is already selected
       if (this.turretIsSelected.length === 0) {
+        if (this.userCooldown > 0) {
+          return;
+        }
+  
+        this.userCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
         // Find the clicked turret
         const clickedTurret = this.turretService.turrets.find(turret => {
           return (
