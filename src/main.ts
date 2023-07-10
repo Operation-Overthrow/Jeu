@@ -25,6 +25,7 @@ export class MyScene extends Phaser.Scene {
   private corePhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysicEnnemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private turrets: Array<Turret> = [];
+  private turretIsSelected: Array<Turret> = [];
   private aiEnemy!: AIBase;
   private aiPlayerEnemy!: AIPlayer;
   private aiCooldown: number = Turret.TURRET_DEFAULT_COOLDOWN;
@@ -50,8 +51,7 @@ export class MyScene extends Phaser.Scene {
   }
 
   create() {
-      
-    this.add.image(1500 / 2, 720 / 2, 'background');
+this.add.image(1500 / 2, 720 / 2, 'background');
     // vider la scène, et la tourelle
     this.bulletService = new BulletService(this.physics);
     this.trajectoryPoints = [];
@@ -59,7 +59,6 @@ export class MyScene extends Phaser.Scene {
     this.CoreAlly.hp = 10;
     this.CoreEnnemy.hp = 10;
 
-  
     this.gameArea(this.gridAlly, 100, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
 
@@ -78,27 +77,35 @@ export class MyScene extends Phaser.Scene {
     this.displayAiTurretCooldown = this.add.text(1000, 50, 'Cooldown IA : ' + (this.aiCooldown > 0 ? Math.round(this.aiCooldown / 60) : 0) + 's', { fontSize: '32px', fill: '#fff' });
 
     this.input.on('pointerdown', (pointer: PointerEvent) => {
-      if (this.userCooldown > 0) {
-        return;
-      }
-      
-      this.userCooldown = 0;
-      this.turrets.forEach(turret => {
-        if (turret.isEnemy) {
-          return;
+      // Check if any turret is already selected
+      if (this.turretIsSelected.length === 0) {
+        // Find the clicked turret
+        const clickedTurret = this.turrets.find(turret => {
+          return (
+            !turret.isEnnemy &&
+            pointer.x >= turret.x - this.cellSize / 2 &&
+            pointer.x <= turret.x + this.cellSize / 2 &&
+            pointer.y >= turret.y - this.cellSize / 2 &&
+            pointer.y <= turret.y + this.cellSize / 2
+          );
+        });
+
+        if (clickedTurret) {
+          this.turretIsSelected.push(clickedTurret);
+          console.log(this.turretIsSelected);
         }
-
-
-        if (
-          (pointer.x >= turret.x - (this.cellSize / 2) && pointer.x <= turret.x + (this.cellSize / 2)) &&
-          (pointer.y >= turret.y - (this.cellSize / 2) && pointer.y <= turret.y + (this.cellSize / 2))
-        ) {
+      } else {
+        // Handle the next action after turret selection
+        // For example, generate a bullet or perform another action
+        const selectedTurret = this.turretIsSelected[0];
           this.bulletService.generateBullet(turret, pointer.x, pointer.y);
-          console.log(this.bulletPhysic,this.corePhysic);
-          this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);  
-        }
-      });
+          this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
+  
+        // Clear the selected turret
+        this.turretIsSelected.length = 0;
+      }
     });
+  
 
     // Ajoute les graphiques de débogage
     this.graphics = this.add.graphics();
@@ -126,12 +133,61 @@ export class MyScene extends Phaser.Scene {
     this.displayUserTurretCooldown.setText('Cooldown joueur : ' + (this.userCooldown > 0 ? Math.round(this.userCooldown / 60) : 0) + 's');
 
     // Dessine le tracé de la trajectoire
-    this.graphics.lineStyle(2, 0x00ff00, 1);
     for (let i = 1; i < this.trajectoryPoints.length; i++) {
       const startPoint = this.trajectoryPoints[i - 1];
       const endPoint = this.trajectoryPoints[i];
       this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
+
+    // Check if a turret is selected
+    if (this.turretIsSelected.length !== 0) {
+      const selectedTurret = this.turretIsSelected[0];
+      const centerX = selectedTurret.x;
+      const centerY = selectedTurret.y;
+
+      // Clear the previous trajectory points
+      this.trajectoryPoints = [];
+
+      // Generate the trajectory points for the 40-degree arc
+      const startAngle = -20;
+      const endAngle = 20;
+      const distanceFromCell = 100; // Distance to move the arc away from the cell in pixels
+      for (let angle = startAngle; angle <= endAngle; angle++) {
+        const angleInRadians = Phaser.Math.DegToRad(angle);
+        const endPointX = centerX + Math.cos(angleInRadians) * (this.cellSize + distanceFromCell);
+        const endPointY = centerY + Math.sin(angleInRadians) * (this.cellSize + distanceFromCell);
+        this.trajectoryPoints.push(new Phaser.Math.Vector2(endPointX, endPointY));
+      }
+
+      // Draw the arc trajectory
+      this.graphics.clear();
+      this.graphics.lineStyle(2, 0xffffff, 1);
+      for (let i = 1; i < this.trajectoryPoints.length; i++) {
+        const startPoint = this.trajectoryPoints[i - 1];
+        const endPoint = this.trajectoryPoints[i];
+        this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+      }
+
+      // Draw line segments from the center of the cell to the endpoints of the arc
+      const startSegmentX = centerX;
+      const startSegmentY = centerY;
+      const endSegmentX = this.trajectoryPoints[0].x;
+      const endSegmentY = this.trajectoryPoints[0].y;
+
+      this.graphics.lineStyle(2, 0xffffff, 1);
+      this.graphics.lineBetween(startSegmentX, startSegmentY, endSegmentX, endSegmentY);
+
+      const startSegmentX2 = centerX;
+      const startSegmentY2 = centerY;
+      const endSegmentX2 = this.trajectoryPoints[this.trajectoryPoints.length - 1].x;
+      const endSegmentY2 = this.trajectoryPoints[this.trajectoryPoints.length - 1].y;
+
+      this.graphics.lineBetween(startSegmentX2, startSegmentY2, endSegmentX2, endSegmentY2);
+    } else {
+      this.trajectoryPoints = [];
+    }
+
+  }
 
     if (this.aiCooldown <= 0) {
       this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
