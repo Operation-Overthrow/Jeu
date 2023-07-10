@@ -1,5 +1,5 @@
 export class Core {
-    static readonly CORE_DEFAULT_HP = 5;
+    static readonly CORE_DEFAULT_HP = 100;
 
     public hp: number;
     public x: number;

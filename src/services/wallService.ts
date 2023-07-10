@@ -58,7 +58,7 @@ export class WallService {
         });
 
         if (selectedWall !== null) {
-            selectedTurret.decreaseHealth(Turret.TURRET_DEFAULT_DAMAGE);
+            selectedWall.decreaseHealth(Turret.TURRET_DEFAULT_DAMAGE);
             
             if (selectedWall['hp'] <= 0) {
                 this.sound.play('explosion');

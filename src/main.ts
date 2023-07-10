@@ -256,7 +256,7 @@ export class MyScene extends Phaser.Scene {
 
     if (this.aiCooldown <= 0) {
       this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
-      this.aiPlayerEnemy.doStuff(this.bulletService, this.turretService.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService);
+      this.aiPlayerEnemy.doStuff(this.bulletService, this.turretService.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService, this.gridEnemy, this.turretService);
     }
 
     this.aiCooldown--;
