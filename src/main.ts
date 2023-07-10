@@ -30,6 +30,10 @@ export class MyScene extends Phaser.Scene {
   private aiCooldown: number = Turret.TURRET_DEFAULT_COOLDOWN;
   private userCooldown: number = 0;
   private bulletService!: BulletService;
+  private displayCoreAllyHealth!: Phaser.GameObjects.Text;
+  private displayCoreEnnemyHealth!: Phaser.GameObjects.Text;
+  private displayAiTurretCooldown!: Phaser.GameObjects.Text;
+  private displayUserTurretCooldown!: Phaser.GameObjects.Text;
 
   get getGridSize() {
     return this.gridSize;
@@ -61,6 +65,16 @@ export class MyScene extends Phaser.Scene {
     this.generateCore('coreEnnemy');
     this.generateTurret( 475, 275);
     this.generateTurret(925, 275, 'tourelle_reversed', true);
+
+
+    // Afficher la vie du coeur
+    this.displayCoreAllyHealth = this.add.text(16, 16, 'Vie du core allié : ' + this.CoreAlly.hp, { fontSize: '32px', fill: '#fff' });
+    this.displayCoreEnnemyHealth = this.add.text(1000, 16, 'Vie du core ennemi : ' + this.CoreEnnemy.hp, { fontSize: '32px', fill: '#fff' });
+    
+    // Afficher le cooldown de l'IA et du joueur
+    this.displayUserTurretCooldown = this.add.text(16, 50, 'Cooldown Joueur : ' + (this.userCooldown > 0 ? Math.round(this.userCooldown / 60) : 0) + 's', { fontSize: '32px', fill: '#fff' });
+    this.displayAiTurretCooldown = this.add.text(1000, 50, 'Cooldown IA : ' + (this.aiCooldown > 0 ? Math.round(this.aiCooldown / 60) : 0) + 's', { fontSize: '32px', fill: '#fff' });
+
     this.input.on('pointerdown', (pointer: PointerEvent) => {
       if (this.userCooldown > 0) {
         return;
@@ -100,6 +114,14 @@ export class MyScene extends Phaser.Scene {
     if (this.circle) {
       this.trajectoryPoints.push(new Phaser.Math.Vector2(this.circle.x, this.circle.y));
     }
+
+    // Mettre à jour le texte de la vie des coeurs
+    this.displayCoreAllyHealth.setText('Vie du coeur allié : ' + this.CoreAlly.hp);
+    this.displayCoreEnnemyHealth.setText('Vie du coeur ennemi : ' + this.CoreEnnemy.hp);
+
+    // Mettre à jour le texte du cooldown de l'IA et du joueur
+    this.displayAiTurretCooldown.setText('Cooldown IA : ' + (this.aiCooldown > 0 ? Math.round(this.aiCooldown / 60) : 0) + 's');
+    this.displayUserTurretCooldown.setText('Cooldown joueur : ' + (this.userCooldown > 0 ? Math.round(this.userCooldown / 60) : 0) + 's');
 
     // Dessine le tracé de la trajectoire
     this.graphics.lineStyle(2, 0x00ff00, 1);
