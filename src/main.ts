@@ -2,14 +2,16 @@ import 'phaser';
 import { MenuScene } from './menu';
 import { Cell } from './models/Cell';
 import { Core } from './models/Core';
-import { Bullet } from './models/Bullet';
 import { Turret } from './models/Turret';
 import { GameOverScene } from './gameover';
+import { AIBase } from './ai/interfaces/AIBase';
+import { AIBasic } from './ai/factories/AIBasic';
+import { AIPlayer } from './ai/interfaces/AIPlayer';
+import { BulletService } from './services/bulletService';
 
 
 
 export class MyScene extends Phaser.Scene {
-  private bulletsGroup!: Phaser.Physics.Arcade.Group;
   private gridSize = 8;
   private cellSize = 50;
   private gridAlly: Array<Cell[]> = [];
@@ -23,6 +25,11 @@ export class MyScene extends Phaser.Scene {
   private corePhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysicEnnemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private turrets: Array<Turret> = [];
+  private aiEnemy!: AIBase;
+  private aiPlayerEnemy!: AIPlayer;
+  private aiCooldown: number = Turret.TURRET_DEFAULT_COOLDOWN;
+  private userCooldown: number = 0;
+  private bulletService!: BulletService;
 
   get getGridSize() {
     return this.gridSize;
@@ -34,11 +41,13 @@ export class MyScene extends Phaser.Scene {
     this.load.image('bullet', 'assets/test.png');
     this.load.image('core', 'assets/reactor1.png');
     this.load.image('tourelle', 'assets/tourelle1.png');
+    this.load.image('tourelle_reversed', 'assets/tourelle_reversed1.png');
   }
 
   create() {
       
     // vider la scène, et la tourelle
+    this.bulletService = new BulletService(this.physics);
     this.trajectoryPoints = [];
     this.turrets = [];
     this.CoreAlly.hp = 10;
@@ -47,27 +56,40 @@ export class MyScene extends Phaser.Scene {
   
     this.gameArea(this.gridAlly, 100, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.gameArea(this.gridEnemy, 900, 600 - this.gridSize * this.cellSize, 0xffffff);
-    this.bulletsGroup = this.physics.add.group();
 
     this.generateCore('coreAlly');
     this.generateCore('coreEnnemy');
-    this.generateTurret();
+    this.generateTurret( 475, 275);
+    this.generateTurret(925, 275, 'tourelle_reversed', true);
     this.input.on('pointerdown', (pointer: PointerEvent) => {
+      if (this.userCooldown > 0) {
+        return;
+      }
+      
+      this.userCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
       this.turrets.forEach(turret => {
+        if (turret.isEnemy) {
+          return;
+        }
+
+
         if (
           (pointer.x >= turret.x - (this.cellSize / 2) && pointer.x <= turret.x + (this.cellSize / 2)) &&
           (pointer.y >= turret.y - (this.cellSize / 2) && pointer.y <= turret.y + (this.cellSize / 2))
         ) {
-          this.generateBullet(turret, pointer)
+          this.bulletService.generateBullet(turret, pointer.x, pointer.y);
           console.log(this.bulletPhysic,this.corePhysic);
-          this.physics.add.collider(this.corePhysic, this.bulletsGroup, this.handleBulletCollision, undefined, this);
-          this.physics.add.collider(this.corePhysicEnnemy, this.bulletsGroup, this.handleBulletCollision, undefined, this);
+          this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);  
         }
       });
     });
 
     // Ajoute les graphiques de débogage
     this.graphics = this.add.graphics();
+
+    // Ajout de l'IA
+    this.aiEnemy = new AIBasic();
+    this.aiPlayerEnemy = this.aiEnemy.createAI();
   }
 
   update() {
@@ -86,17 +108,14 @@ export class MyScene extends Phaser.Scene {
       const endPoint = this.trajectoryPoints[i];
       this.graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
-  }
 
-  generateBullet(turret: Turret, pointer: PointerEvent) {
-    let bullet = new Bullet(turret.x, turret.y, 300);
-    let bulletPhysic = this.bulletsGroup.create(bullet.x, bullet.y, 'bullet');
-
-    // calculer la vélocité de la balle en fonction de la position de la souris par rapport au centre du cercle
-    const xPosition =  turret.x - pointer.x;
-    const yPosition =  turret.y - pointer.y;
-
-    bulletPhysic.setVelocity(xPosition * 20, yPosition * 20);
+    if (this.aiCooldown <= 0) {
+      this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
+      this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
+    }
+    
+    this.aiCooldown--;
+    this.userCooldown--;
   }
 
   generateCore(name: string) {
@@ -124,9 +143,9 @@ export class MyScene extends Phaser.Scene {
     }
   }
 
-  generateTurret() {
-    let turret = new Turret(10, 475, 275);
-    let turretPhysic = this.physics.add.sprite(turret.x, turret.y, 'tourelle');
+  generateTurret(x: number, y: number, sprite: string = 'tourelle', isEnemy: boolean = false) {
+    let turret = new Turret(10, x, y, isEnemy);
+    let turretPhysic = this.physics.add.sprite(turret.x, turret.y, sprite);
     turretPhysic.body.allowGravity = false;
     turretPhysic.body.immovable = true;
     turretPhysic.setDepth(1);
@@ -222,7 +241,7 @@ export class MyScene extends Phaser.Scene {
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 1500,
-  height: 1000,
+  height: 720,
   scene: [MenuScene, MyScene, GameOverScene],
   physics: {
     default: 'arcade',
