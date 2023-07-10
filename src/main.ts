@@ -57,8 +57,6 @@ export class MyScene extends Phaser.Scene {
     this.load.image('wall', 'assets/brick1.png');
     this.load.audio('tir', 'assets/tir.mp3');
     this.load.audio('audio_background', 'assets/audio-background.mp3');
-    this.load.audio('explosion', 'assets/explosion.mp3');
-    this.load.audio('gameover', 'assets/gameover.mp3');
   }
 
   create() {

@@ -31,7 +31,6 @@ export class TurretService {
             selectedTurret.decreaseHealth(Turret.TURRET_DEFAULT_DAMAGE);
 
             if (selectedTurret['hp'] <= 0) {
-                this.sound.play('explosion');
                 this.turretService.destroyTurret(selectedTurret['x'], selectedTurret['y']);
 
                 this.gridAlly.forEach((row: Array<Cell>) => {
