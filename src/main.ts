@@ -247,9 +247,6 @@ export class MyScene extends Phaser.Scene {
       const isPointerInsideSector = this.isPointerInSector(pointerX, pointerY, centerX, centerY);
       this.isPointerInsideSector = isPointerInsideSector;
 
-      console.log(this.isPointerInsideSector);
-
-
       if (isPointerInsideSector) {
         if(pointerX <= this.trajectoryPoints[(this.trajectoryPoints.length-1)/2].x){
           this.graphics.lineBetween(centerX, centerY, pointerX, pointerY);
