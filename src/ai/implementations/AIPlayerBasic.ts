@@ -4,7 +4,7 @@ import { BulletService } from "../../services/bulletService";
 import { AIPlayer } from "../interfaces/AIPlayer";
 
 export class AIPlayerBasic implements AIPlayer {
-    private blackList: Array<{x: number, y:number}> = [];
+    private goodShot: Array<{x: number, y:number}> = [];
   doStuff(
     bulletService: BulletService,
     turrets: Array<Turret>,
@@ -21,20 +21,19 @@ export class AIPlayerBasic implements AIPlayer {
         return;
       }
 
-      let isBlackListed = true;
+      let hasGoodShot = this.goodShot.length > 0;
 
-      let positionX = 0;
-      let positionY = 0;
+      let positionX =turret.x + Math.floor(Math.random() * (cellSize / 2));
+      let positionY = turret.y + Math.floor(Math.random() * cellSize);
 
-      while(isBlackListed) {
-        positionX = turret.x + Math.floor(Math.random() * (cellSize / 2));
-        positionY = turret.y + Math.floor(Math.random() * cellSize);
 
-        // vérifier si la position est blacklistée
-        isBlackListed = this.blackList.some((blackListedPosition) => {
-            return blackListedPosition.x === positionX && blackListedPosition.y === positionY;
-        });
+      if (hasGoodShot) {
+        let goodShot = this.goodShot[0];
+        positionX = goodShot.x;
+        positionY = goodShot.y;
       }
+
+
 
       bulletService.generateBullet(turret, positionX, positionY);
       bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene);  
@@ -43,12 +42,15 @@ export class AIPlayerBasic implements AIPlayer {
         let currentTurretPosition = {
             x: positionX,
             y: positionY
-        };      
+        };
+      
         // Vérifier si le core ennemi a perdu de la vie après 5 secondes
         setTimeout(() => {
-            if(enemyCore.hp === currentCoreHp) {
-                // si le core ennemi n'a pas perdu de vie, on blacklist la position de la tourelle
-                this.blackList.push(currentTurretPosition);
+            if(enemyCore.hp !== currentCoreHp) {
+              // si oui, on ajoute la position de la tourelle à la liste des bonnes positions en vérifiant qu'elle n'y est pas déjà
+              if(!this.goodShot.some((shot) => shot.x === currentTurretPosition.x && shot.y === currentTurretPosition.y)) {
+                this.goodShot.push(currentTurretPosition);
+              }
             }
         }, 4000);
     });
