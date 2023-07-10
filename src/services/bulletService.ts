@@ -16,11 +16,16 @@ export class BulletService {
         let bulletPhysic = this.bulletsGroup.create(bullet.x, bullet.y, 'bullet');
     
         // calculer la vélocité de la balle en fonction de la position de la souris par rapport au centre du cercle
-        const xPosition =  turret.x - pointerX;
-        const yPosition =  turret.y - pointerY;
+        const xPosition = Math.abs(turret.x - pointerX);
+        const yPosition = turret.y - pointerY;
+        
     
-        bulletPhysic.setVelocity(xPosition * Turret.TURRET_VELOCITY, yPosition * Turret.TURRET_VELOCITY);
+        const normalizedVelocity = new Phaser.Math.Vector2(xPosition, yPosition).normalize().scale(400);
+
+        bulletPhysic.setVelocity(normalizedVelocity.x, -normalizedVelocity.y);
+
       }
+      
 
       public addCollision(physics: Phaser.Physics.Arcade.ArcadePhysics, corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, handleBulletCollision: any, phaserScene: Phaser.Scene) {
         physics.add.collider(corePhysic, this.bulletsGroup, handleBulletCollision, undefined, phaserScene);
