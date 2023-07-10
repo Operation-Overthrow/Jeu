@@ -66,7 +66,7 @@ export class WallService {
 
                 this.gridAlly.forEach((row: Array<Cell>) => {
                     row.forEach((cell: Cell) => {
-                        if (cell.x === selectedWall['x'] - 25 && cell.y === selectedWall['y'] - 25) {
+                        if (cell['x'] === selectedWall!['x'] - 25 && cell['y'] === selectedWall!['y'] - 25) {
                             cell.updateIsEmpty(true);
                         }
                     });
@@ -74,7 +74,7 @@ export class WallService {
 
                 this.gridEnemy.forEach((row: Array<Cell>) => {
                     row.forEach((cell: Cell) => {
-                        if (cell.x === selectedWall['x'] - 25 && cell.y === selectedWall['y'] - 25) {
+                        if (cell['x'] === selectedWall!['x'] - 25 && cell['y'] === selectedWall!['y'] - 25) {
                             cell.updateIsEmpty(true);
                         }
                     });
