@@ -2,11 +2,16 @@ import 'phaser';
 import { game } from './main';
 
  export class GameOverScene extends Phaser.Scene {
+    music!: Phaser.Sound.HTML5AudioSound|Phaser.Sound.WebAudioSound|Phaser.Sound.NoAudioSound;
+
     constructor() {
         super({ key: 'GameOverScene' });
     }
 
     create() {
+        
+        this.music = this.sound.add('gameover');
+        this.music.play();
         const gameWidth: number = Number(game.config.width);
         const gameHeight: number = Number(game.config.height);
         // Code de création du menu
@@ -30,6 +35,7 @@ import { game } from './main';
 
         startButton.on('pointerdown', () => {
             // Code à exécuter lorsque le bouton est cliqué
+            this.music.stop();
             this.scene.start('MenuScene'); // Transition vers une autre scène (par exemple, la scène du jeu)
         });
     }

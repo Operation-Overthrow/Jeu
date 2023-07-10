@@ -339,7 +339,6 @@ export class MyScene extends Phaser.Scene {
     if (selectedCore.hp <= 0) {
       
       this.music.stop();
-      this.sound.play('gameover');
       this.scene.start('GameOverScene');
     }
 
