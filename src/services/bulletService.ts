@@ -2,6 +2,7 @@ import 'phaser';
 import { Bullet } from "../models/Bullet";
 import { Turret } from "../models/Turret";
 import { WallService } from './wallService';
+import { game } from '../main';
 
 
 export class BulletService {
@@ -19,14 +20,15 @@ export class BulletService {
         // calculer la vélocité de la balle en fonction de la position de la souris par rapport au centre du cercle
         const xPosition = Math.abs(turret.x - pointerX);
         const yPosition = turret.y - pointerY;
-        
+
     
         const normalizedVelocity = new Phaser.Math.Vector2(xPosition, yPosition).normalize().scale(400);
 
         bulletPhysic.setVelocity(normalizedVelocity.x, -normalizedVelocity.y);
 
+        game.sound.play('tir');
       }
-      
+
 
       public addCollision(physics: Phaser.Physics.Arcade.ArcadePhysics, corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, handleBulletCollision: any, phaserScene: Phaser.Scene, wallService: WallService) {
         physics.add.collider(corePhysic, this.bulletsGroup, handleBulletCollision, undefined, phaserScene);

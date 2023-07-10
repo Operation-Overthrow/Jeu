@@ -9,6 +9,7 @@ import { AIBasic } from './ai/factories/AIBasic';
 import { AIPlayer } from './ai/interfaces/AIPlayer';
 import { BulletService } from './services/bulletService';
 import { WallService } from './services/wallService';
+import { HowToScene } from './scenes/howto';
 
 
 
@@ -54,6 +55,8 @@ export class MyScene extends Phaser.Scene {
     this.load.image('tourelle_reversed', 'assets/tourelle_reversed1.png');
     this.load.image('dirt', 'assets/dirt1.png');
     this.load.image('wall', 'assets/brick1.png');
+    this.load.audio('tir', 'assets/tir.mp3');
+    this.load.audio('audio_background', 'assets/audio-background.mp3');
   }
 
   create() {
@@ -71,7 +74,6 @@ export class MyScene extends Phaser.Scene {
 
     this.generateCore('coreAlly');
     this.generateCore('coreEnnemy');
-    this.generateTurret( 475, 275);
     this.generateTurret(925, 275, 'tourelle_reversed', true);
 
     const updateCellIsEmpty = (turret: Turret, cell: Cell) => {
@@ -81,12 +83,6 @@ export class MyScene extends Phaser.Scene {
     };
 
     this.turrets.forEach((turret) => {
-      this.gridAlly.forEach((row) => {
-        row.forEach((cell) => {
-          updateCellIsEmpty(turret, cell);
-        });
-      });
-
       this.gridEnemy.forEach((row) => {
         row.forEach((cell) => {
           updateCellIsEmpty(turret, cell);
@@ -145,6 +141,12 @@ export class MyScene extends Phaser.Scene {
 
     this.keyW = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.keyT = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.T);
+
+    // Ajout de la musique de fond
+    const music = this.sound.add('audio_background');
+    music.play();
+    music.loop = true;
+    music.volume = 0.1;
   }
 
   update() {
@@ -423,7 +425,7 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 1500,
   height: 720,
-  scene: [MenuScene, MyScene, GameOverScene],
+  scene: [MenuScene, MyScene, GameOverScene, HowToScene],
   physics: {
     default: 'arcade',
     arcade: {
