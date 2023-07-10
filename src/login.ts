@@ -1,5 +1,7 @@
-document.addEventListener('DOMContentLoaded', () => {
-    if(localStorage.getItem('token')) {
+import { checkToken } from "./utils";
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if(await checkToken()) {
         window.location.href = '/';
         return;
     }

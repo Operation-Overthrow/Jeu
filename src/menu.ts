@@ -1,12 +1,13 @@
 import 'phaser';
 import { game } from './main';
+import { checkToken } from './utils';
 
  export class MenuScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MenuScene' });
     }
 
-    create() {
+    async create() {
         // Code de création du menu
         // centrer le texte à partir de la taille du gameObject
         this.add.text(1500 / 2, 720 / 2 - 150, 'Operation Overthrow', { fontSize: '48px'}).setOrigin(0.5);
@@ -15,7 +16,7 @@ import { game } from './main';
         const gameWidth: number = Number(game.config.width);
         const gameHeight: number = Number(game.config.height);
         
-        if(!localStorage.getItem('token')) {
+        if(!(await checkToken())) {
             const loginButton = this.add.rectangle(gameWidth / 2, gameHeight / 2, 250, 50, 0xffffff).setOrigin(0.5);
             const buttonText = this.add.text(gameWidth / 2, gameHeight / 2, 'Se connecter', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
         
