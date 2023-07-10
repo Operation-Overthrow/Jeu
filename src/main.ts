@@ -57,6 +57,8 @@ export class MyScene extends Phaser.Scene {
     this.load.image('wall', 'assets/brick1.png');
     this.load.audio('tir', 'assets/tir.mp3');
     this.load.audio('audio_background', 'assets/audio-background.mp3');
+    this.load.audio('explosion', 'assets/explosion.mp3');
+    this.load.audio('gameover', 'assets/gameover.mp3');
   }
 
   create() {
@@ -335,7 +337,9 @@ export class MyScene extends Phaser.Scene {
     selectedCore.reduceHP(Turret.TURRET_DEFAULT_DAMAGE * 2);
 
     if (selectedCore.hp <= 0) {
+      
       this.music.stop();
+      this.sound.play('gameover');
       this.scene.start('GameOverScene');
     }
 

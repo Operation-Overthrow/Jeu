@@ -61,6 +61,7 @@ export class WallService {
             selectedTurret.decreaseHealth(Turret.TURRET_DEFAULT_DAMAGE);
             
             if (selectedWall['hp'] <= 0) {
+                this.sound.play('explosion');
                 this.wallService.destroyWall(selectedWall['x'], selectedWall['y']);
 
                 this.gridAlly.forEach((row: Array<Cell>) => {
