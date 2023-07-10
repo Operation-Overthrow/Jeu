@@ -65,6 +65,7 @@ export class TurretService {
     turretPhysic.body.moves = false;
 
     this.turrets.push(turret);
+    
 
     this.turretsPhysics.add(turretPhysic);
   }

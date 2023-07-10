@@ -10,9 +10,25 @@ export class BulletService {
     bulletsGroup: Phaser.Physics.Arcade.Group;
     turretService: TurretService;
 
-    constructor(physics: Phaser.Physics.Arcade.ArcadePhysics, turretService: TurretService) {
+    constructor(physics: Phaser.Physics.Arcade.ArcadePhysics, turretService: TurretService, scene: Phaser.Scene) {
         this.bulletsGroup = physics.add.group();
         this.turretService = turretService;
+        
+        let localBulletsPhysics = this.bulletsGroup;
+        scene.time.addEvent({
+          loop: true,
+          delay: 1000, // Vérifie toutes les secondes (ajuste la valeur selon tes besoins)
+          callback: function() {
+            localBulletsPhysics.getChildren().forEach(function(bullet) {
+              if (!Phaser.Geom.Rectangle.Overlaps(bullet.getBounds(), scene.cameras.main.worldView)) {
+                // L'objet est hors de l'écran, donc on le détruit
+                bullet.destroy();
+                localBulletsPhysics.remove(bullet);
+              }
+            }, this);
+          },
+          callbackScope: this
+        });
 
     }
 

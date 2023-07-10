@@ -65,7 +65,7 @@ export class MyScene extends Phaser.Scene {
     this.add.image(1500 / 2, 720 / 2, 'background');
     // vider la scène, et la tourelle
     this.turretService = new TurretService(this.physics);
-    this.bulletService = new BulletService(this.physics, this.turretService);
+    this.bulletService = new BulletService(this.physics, this.turretService, this);
     this.wallService = new WallService(this.physics);
     this.trajectoryPoints = [];
     this.CoreAlly.hp = Core.CORE_DEFAULT_HP;
