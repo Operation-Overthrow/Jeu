@@ -1,4 +1,5 @@
 import 'phaser';
+import { game } from './main';
 
  export class GameOverScene extends Phaser.Scene {
     constructor() {
@@ -6,14 +7,16 @@ import 'phaser';
     }
 
     create() {
+        const gameWidth: number = Number(game.config.width);
+        const gameHeight: number = Number(game.config.height);
         // Code de création du menu
-        this.add.text(400, 100, 'Game Over', { fontSize: '48px'}).setOrigin(0.5);
+        this.add.text(gameWidth / 2, gameHeight / 2 - 100, 'Game Over', { fontSize: '48px'}).setOrigin(0.5);
         console.log(this.scene);
         
 
          // Bouton de démarrage
-        const startButton = this.add.rectangle(400, 200, 350, 50, 0xffffff).setOrigin(0.5);
-        const buttonText = this.add.text(400, 200, 'Retourner au menu', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        const startButton = this.add.rectangle(gameWidth / 2, gameHeight / 2, 350, 50, 0xffffff).setOrigin(0.5);
+        const buttonText = this.add.text(gameWidth / 2, gameHeight / 2, 'Retourner au menu', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
        
         startButton.setInteractive();
 
