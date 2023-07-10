@@ -42,6 +42,7 @@ export class MyScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image('background', 'assets/background.jpg');
     this.load.image('bullet', 'assets/test.png');
     this.load.image('core', 'assets/reactor1.png');
     this.load.image('tourelle', 'assets/tourelle1.png');
@@ -50,6 +51,7 @@ export class MyScene extends Phaser.Scene {
 
   create() {
       
+    this.add.image(1500 / 2, 720 / 2, 'background');
     // vider la scène, et la tourelle
     this.bulletService = new BulletService(this.physics);
     this.trajectoryPoints = [];
@@ -80,7 +82,7 @@ export class MyScene extends Phaser.Scene {
         return;
       }
       
-      this.userCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
+      this.userCooldown = 0;
       this.turrets.forEach(turret => {
         if (turret.isEnemy) {
           return;
@@ -233,6 +235,7 @@ export class MyScene extends Phaser.Scene {
         let graphics = this.add.graphics();
         // Dessiner la cellule
         if (!!cell['color']) {
+          graphics.setAlpha(0.5);
           graphics.fillStyle(cell['color']);
           graphics.fillRect(x, y, cellSize, cellSize);
         }
@@ -273,4 +276,4 @@ const config: Phaser.Types.Core.GameConfig = {
   }
 };
 
-const game = new Phaser.Game(config);
+export const game = new Phaser.Game(config);

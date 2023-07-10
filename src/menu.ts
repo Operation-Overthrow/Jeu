@@ -1,5 +1,5 @@
 import 'phaser';
-import { MyScene } from './main';
+import { game } from './main';
 
  export class MenuScene extends Phaser.Scene {
     constructor() {
@@ -8,11 +8,14 @@ import { MyScene } from './main';
 
     create() {
         // Code de création du menu
-        this.add.text(400, 100, 'Operation Overthrow', { fontSize: '48px'}).setOrigin(0.5);
+        // centrer le texte à partir de la taille du gameObject
+        this.add.text(1500 / 2, 720 / 2 - 100, 'Operation Overthrow', { fontSize: '48px'}).setOrigin(0.5);
 
          // Bouton de démarrage
-        const startButton = this.add.rectangle(400, 200, 200, 50, 0xffffff).setOrigin(0.5);
-        const buttonText = this.add.text(400, 200, 'Démarrer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        const gameWidth: number = Number(game.config.width);
+        const gameHeight: number = Number(game.config.height);
+        const startButton = this.add.rectangle(gameWidth / 2, gameHeight / 2, 200, 50, 0xffffff).setOrigin(0.5);
+        const buttonText = this.add.text(gameWidth / 2, gameHeight / 2, 'Démarrer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
        
         startButton.setInteractive();
 
