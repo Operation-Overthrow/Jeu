@@ -10,6 +10,7 @@ import { AIPlayer } from './ai/interfaces/AIPlayer';
 import { BulletService } from './services/bulletService';
 import { WallService } from './services/wallService';
 import { HowToScene } from './scenes/howto';
+import { TurretService } from './services/turretService';
 
 
 
@@ -18,14 +19,13 @@ export class MyScene extends Phaser.Scene {
   private cellSize = 50;
   private gridAlly: Array<Cell[]> = [];
   private gridEnemy: Array<Cell[]> = [];
-  private CoreAlly: Core = new Core(10, 275, 375);
-  private CoreEnnemy: Core = new Core(10, 1075, 375);
+  private CoreAlly: Core = new Core(Core.CORE_DEFAULT_HP, 275, 375);
+  private CoreEnnemy: Core = new Core(Core.CORE_DEFAULT_HP, 1075, 375);
   private graphics!: Phaser.GameObjects.Graphics;
   private circle!: Phaser.GameObjects.Arc & { body: Phaser.Physics.Arcade.Body };
   private trajectoryPoints: Phaser.Math.Vector2[] = [];
   private corePhysic!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private corePhysicEnnemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  private turrets: Array<Turret> = [];
   private turretIsSelected: Array<Turret> = [];
   private aiEnemy!: AIBase;
   private aiPlayerEnemy!: AIPlayer;
@@ -40,10 +40,10 @@ export class MyScene extends Phaser.Scene {
   private keyW!: Phaser.Input.Keyboard.Key;
   private keyT!: Phaser.Input.Keyboard.Key;
   private isPointerInsideSector: boolean = false;
+  private music!: Phaser.Sound.HTML5AudioSound|Phaser.Sound.WebAudioSound|Phaser.Sound.NoAudioSound;
+  private turretService!: TurretService;
 
-  get getGridSize() {
-    return this.gridSize;
-  } constructor() {
+  constructor() {
     super('my-scene');
   }
 
@@ -62,19 +62,19 @@ export class MyScene extends Phaser.Scene {
   create() {
     this.add.image(1500 / 2, 720 / 2, 'background');
     // vider la scène, et la tourelle
-    this.bulletService = new BulletService(this.physics);
+    this.turretService = new TurretService(this.physics);
+    this.bulletService = new BulletService(this.physics, this.turretService);
     this.wallService = new WallService(this.physics);
     this.trajectoryPoints = [];
-    this.turrets = [];
-    this.CoreAlly.hp = 10;
-    this.CoreEnnemy.hp = 10;
+    this.CoreAlly.hp = Core.CORE_DEFAULT_HP;
+    this.CoreEnnemy.hp = Core.CORE_DEFAULT_HP;
 
     this.gameArea('ally', 100, 600 - this.gridSize * this.cellSize, 0xffffff);
     this.gameArea('ennemy', 900, 600 - this.gridSize * this.cellSize, 0xffffff);
 
     this.generateCore('coreAlly');
     this.generateCore('coreEnnemy');
-    this.generateTurret(925, 275, 'tourelle_reversed', true);
+    this.turretService.generateTurret(925, 275, 'tourelle_reversed', true, this);
 
     const updateCellIsEmpty = (turret: Turret, cell: Cell) => {
       if (turret.x === cell['x'] + 25 && turret.y === cell['y'] + 25) {
@@ -82,7 +82,7 @@ export class MyScene extends Phaser.Scene {
       }
     };
 
-    this.turrets.forEach((turret) => {
+    this.turretService.turrets.forEach((turret) => {
       this.gridEnemy.forEach((row) => {
         row.forEach((cell) => {
           updateCellIsEmpty(turret, cell);
@@ -102,12 +102,8 @@ export class MyScene extends Phaser.Scene {
     this.input.on('pointerdown', (pointer: PointerEvent) => {
       // Check if any turret is already selected
       if (this.turretIsSelected.length === 0) {
-
-        const pointerX = this.input.activePointer.x;
-        const pointerY = this.input.activePointer.y;
-
         // Find the clicked turret
-        const clickedTurret = this.turrets.find(turret => {
+        const clickedTurret = this.turretService.turrets.find(turret => {
           return (
             !turret.isEnemy &&
             pointer.x >= turret.x - this.cellSize / 2 &&
@@ -122,7 +118,7 @@ export class MyScene extends Phaser.Scene {
         }
       } else {
         const selectedTurret = this.turretIsSelected[0];
-        if(this.isPointerInsideSector == true){
+        if(this.isPointerInsideSector){
           this.bulletService.generateBullet(selectedTurret, pointer.x, pointer.y);
           this.bulletService.addCollision(this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService);
         }
@@ -143,10 +139,10 @@ export class MyScene extends Phaser.Scene {
     this.keyT = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.T);
 
     // Ajout de la musique de fond
-    const music = this.sound.add('audio_background');
-    music.play();
-    music.loop = true;
-    music.volume = 0.1;
+    this.music = this.sound.add('audio_background');
+    this.music.play();
+    this.music.loop = true;
+    this.music.volume = 0.1;
   }
 
   update() {
@@ -258,7 +254,7 @@ export class MyScene extends Phaser.Scene {
 
     if (this.aiCooldown <= 0) {
       this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
-      this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService);
+      this.aiPlayerEnemy.doStuff(this.bulletService, this.turretService.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this, this.wallService);
     }
 
     this.aiCooldown--;
@@ -302,7 +298,7 @@ export class MyScene extends Phaser.Scene {
 
       if (cell !== null && cell['isEmpty']) {
         let theCell: Cell = cell;
-        this.generateTurret(theCell['x'] + 25, theCell['y'] + 25, 'tourelle', false);
+        this.turretService.generateTurret(theCell['x'] + 25, theCell['y'] + 25, 'tourelle', false, this);
         theCell.updateIsEmpty(false);
       }
     }
@@ -313,7 +309,7 @@ export class MyScene extends Phaser.Scene {
     let currentCore = name === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
     let corePhysicLocal = this.physics.add.sprite(currentCore.x, currentCore.y, 'core');
     corePhysicLocal.setName(name);
-    corePhysicLocal.body.allowGravity = false;
+    corePhysicLocal.body.setAllowGravity(false);
     corePhysicLocal.body.immovable = true;
 
 
@@ -334,25 +330,12 @@ export class MyScene extends Phaser.Scene {
     }
   }
 
-  generateTurret(x: number, y: number, sprite: string = 'tourelle', isEnemy: boolean = false) {
-    let turret = new Turret(10, x, y, isEnemy);
-    const graphics = this.add.graphics();
-    graphics.setAlpha(0.7);
-    graphics.fillStyle(0xf4f4f4);
-    graphics.fillRect(x - 25, y - 25, this.cellSize, this.cellSize);
-    let turretPhysic = this.physics.add.sprite(turret.x, turret.y, sprite);
-    turretPhysic.body.allowGravity = false;
-    turretPhysic.body.immovable = true;
-    turretPhysic.setDepth(1);
-
-    this.turrets.push(turret);
-  }
-
   private handleBulletCollision(core: Phaser.GameObjects.GameObject, bullet: Phaser.GameObjects.GameObject) {
     let selectedCore = core['name'] === 'coreAlly' ? this.CoreAlly : this.CoreEnnemy;
-    selectedCore.reduceHP(2);
+    selectedCore.reduceHP(Turret.TURRET_DEFAULT_DAMAGE * 2);
 
     if (selectedCore.hp <= 0) {
+      this.music.stop();
       this.scene.start('GameOverScene');
     }
 
@@ -390,7 +373,7 @@ export class MyScene extends Phaser.Scene {
         }
 
           let basePhysics = this.physics.add.sprite(x + 25, y + 25, 'dirt');
-          basePhysics.body.allowGravity = false;
+          basePhysics.body.setAllowGravity(false);
           basePhysics.body.immovable = true;
 
 
@@ -431,7 +414,7 @@ const config: Phaser.Types.Core.GameConfig = {
     arcade: {
       gravity: { y: 200 } // Définit la gravité vers le bas (y positif)
     }
-  }
+  },
 };
 
 export const game = new Phaser.Game(config);

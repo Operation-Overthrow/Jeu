@@ -37,7 +37,7 @@ export class AIPlayerBasic implements AIPlayer {
 
 
 
-      bulletService.generateBullet(turret, positionX, positionY);
+      bulletService.generateBullet(turret, positionX, positionY, true);
       bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene, wallService);  
       // save the current position and current ally core hp
         let currentCoreHp = enemyCore.hp;

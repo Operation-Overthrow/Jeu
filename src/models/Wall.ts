@@ -10,4 +10,8 @@ export class Wall {
     this.y = y;
     this.hp = hp;
   }
+
+  decreaseHealth(damage: number) {
+      this.hp -= damage;
+  }
 }

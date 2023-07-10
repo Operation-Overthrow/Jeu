@@ -1,6 +1,7 @@
 import 'phaser';
 import { Wall } from "../models/Wall";
 import { Cell } from '../models/Cell';
+import { Turret } from '../models/Turret';
 
 
 export class WallService {
@@ -57,7 +58,8 @@ export class WallService {
         });
 
         if (selectedWall !== null) {
-            selectedWall['hp']--;
+            selectedTurret.decreaseHealth(Turret.TURRET_DEFAULT_DAMAGE);
+            
             if (selectedWall['hp'] <= 0) {
                 this.wallService.destroyWall(selectedWall['x'], selectedWall['y']);
 
