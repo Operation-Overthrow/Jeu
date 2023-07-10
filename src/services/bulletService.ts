@@ -19,7 +19,7 @@ export class BulletService {
         const xPosition =  turret.x - pointerX;
         const yPosition =  turret.y - pointerY;
     
-        bulletPhysic.setVelocity(xPosition * 20, yPosition * 20);
+        bulletPhysic.setVelocity(xPosition * Turret.TURRET_VELOCITY, yPosition * Turret.TURRET_VELOCITY);
       }
 
       public addCollision(physics: Phaser.Physics.Arcade.ArcadePhysics, corePhysic: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, corePhysicEnnemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, handleBulletCollision: any, phaserScene: Phaser.Scene) {

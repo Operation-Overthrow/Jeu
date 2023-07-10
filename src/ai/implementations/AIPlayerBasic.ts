@@ -27,8 +27,8 @@ export class AIPlayerBasic implements AIPlayer {
       let positionY = 0;
 
       while(isBlackListed) {
-        positionX = turret.x - (cellSize / 2) + Math.floor(Math.random() * cellSize);
-        positionY = turret.y - (cellSize / 2) + Math.floor(Math.random() * cellSize);
+        positionX = turret.x + Math.floor(Math.random() * (cellSize / 2));
+        positionY = turret.y + Math.floor(Math.random() * cellSize);
 
         // vérifier si la position est blacklistée
         isBlackListed = this.blackList.some((blackListedPosition) => {

@@ -27,7 +27,8 @@ export class MyScene extends Phaser.Scene {
   private turrets: Array<Turret> = [];
   private aiEnemy!: AIBase;
   private aiPlayerEnemy!: AIPlayer;
-  private aiCooldown: number = 360;
+  private aiCooldown: number = Turret.TURRET_DEFAULT_COOLDOWN;
+  private userCooldown: number = 0;
   private bulletService!: BulletService;
 
   get getGridSize() {
@@ -61,6 +62,11 @@ export class MyScene extends Phaser.Scene {
     this.generateTurret( 475, 275);
     this.generateTurret(925, 275, 'tourelle_reversed', true);
     this.input.on('pointerdown', (pointer: PointerEvent) => {
+      if (this.userCooldown > 0) {
+        return;
+      }
+      
+      this.userCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
       this.turrets.forEach(turret => {
         if (turret.isEnemy) {
           return;
@@ -104,11 +110,12 @@ export class MyScene extends Phaser.Scene {
     }
 
     if (this.aiCooldown <= 0) {
-      this.aiCooldown = 360;
+      this.aiCooldown = Turret.TURRET_DEFAULT_COOLDOWN;
       this.aiPlayerEnemy.doStuff(this.bulletService, this.turrets, this.cellSize, this.CoreAlly, this.physics, this.corePhysic, this.corePhysicEnnemy, this.handleBulletCollision, this);
     }
     
     this.aiCooldown--;
+    this.userCooldown--;
   }
 
   generateCore(name: string) {
@@ -234,7 +241,7 @@ export class MyScene extends Phaser.Scene {
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 1500,
-  height: 1000,
+  height: 720,
   scene: [MenuScene, MyScene, GameOverScene],
   physics: {
     default: 'arcade',
