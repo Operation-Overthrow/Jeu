@@ -80,23 +80,7 @@ export class AIPlayerBasic implements AIPlayer {
 
       bulletService.generateBullet(turret, positionX, positionY, true);
       bulletService.addCollision(physics, corePhysic, corePhysicEnnemy, handleBulletCollision, scene, wallService);  
-      // save the current position and current ally core hp
-        let currentCoreHp = enemyCore.hp;
-        let currentTurretPosition = {
-            x: positionX,
-            y: positionY
-        };
-        isSended = true;
       
-        // Vérifier si le core ennemi a perdu de la vie après 5 secondes
-        setTimeout(() => {
-            if(enemyCore.hp !== currentCoreHp) {
-              // si oui, on ajoute la position de la tourelle à la liste des bonnes positions en vérifiant qu'elle n'y est pas déjà
-              if(!this.goodShot.some((shot) => shot.x === currentTurretPosition.x && shot.y === currentTurretPosition.y)) {
-                this.goodShot.push(currentTurretPosition);
-              }
-            }
-        }, 4000);
     });
   }
 
