@@ -47,6 +47,7 @@ export class MyScene extends Phaser.Scene {
     this.load.image('core', 'assets/reactor1.png');
     this.load.image('tourelle', 'assets/tourelle1.png');
     this.load.image('tourelle_reversed', 'assets/tourelle_reversed1.png');
+    this.load.image('dirt', 'assets/dirt1.png');
   }
 
   create() {
@@ -169,6 +170,10 @@ export class MyScene extends Phaser.Scene {
 
   generateTurret(x: number, y: number, sprite: string = 'tourelle', isEnemy: boolean = false) {
     let turret = new Turret(10, x, y, isEnemy);
+    const graphics = this.add.graphics();
+    graphics.setAlpha(0.7);
+    graphics.fillStyle(0xf4f4f4);
+    graphics.fillRect(x - 25, y - 25, this.cellSize, this.cellSize);
     let turretPhysic = this.physics.add.sprite(turret.x, turret.y, sprite);
     turretPhysic.body.allowGravity = false;
     turretPhysic.body.immovable = true;
@@ -231,15 +236,13 @@ export class MyScene extends Phaser.Scene {
           cell = new Cell(x, y, true);
         }
 
-        cell.colorEmpty();
-        let graphics = this.add.graphics();
-        // Dessiner la cellule
-        if (!!cell['color']) {
-          graphics.setAlpha(0.5);
-          graphics.fillStyle(cell['color']);
-          graphics.fillRect(x, y, cellSize, cellSize);
-        }
-        // Dessiner le cercle inscrit dans le grand rectangle 2x2
+          let basePhysics = this.physics.add.sprite(x + 25, y + 25, 'dirt');
+          basePhysics.body.allowGravity = false;
+          basePhysics.body.immovable = true;
+
+
+          let graphics = this.add.graphics();
+          graphics.setAlpha(0.2);
         if (
           i === this.CoreAlly['x'] &&
           j === this.CoreAlly['y']
