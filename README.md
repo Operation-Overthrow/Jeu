@@ -24,3 +24,7 @@ docker compose up -d
 ## Url utile
 
 - [Site](http://127.0.0.1:5173)
+- [Démo](https://operation-overthrow.melaine-gerard.fr)
+
+## Inscription
+Comme nous n'avons pas encore de page d'inscription, vous devez vous rendre sur la documentation de l'API et utiliser la route /api/register pour vous inscrire (voir le repository de l'API pour obtenir le lien correspondant)
