@@ -1,5 +1,5 @@
 export class Turret {
-    static readonly TURRET_DEFAULT_COOLDOWN = 360; // 6 secondes
+    static readonly TURRET_DEFAULT_COOLDOWN = 6; // 6 secondes
     static readonly TURRET_VELOCITY = 20;
     static readonly TURRET_DEFAULT_HP = 2;
     static readonly TURRET_DEFAULT_DAMAGE = 1;
