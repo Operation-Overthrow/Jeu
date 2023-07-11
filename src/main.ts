@@ -136,7 +136,6 @@ export class MyScene extends Phaser.Scene {
         this.turretIsSelected.length = 0;
       }
 
-      this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.onEvent, callbackScope: this, loop: true });
     });
 
 
@@ -155,6 +154,7 @@ export class MyScene extends Phaser.Scene {
     this.music.play();
     this.music.loop = true;
     this.music.volume = 0.1;
+    this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.onEvent, callbackScope: this, loop: true });
   }
 
   isPointerInSector = (pointerX: number, pointerY:number, centerX: number, centerY: number) => {
@@ -178,6 +178,14 @@ export class MyScene extends Phaser.Scene {
   update() {
     // Efface le tracé précédent
     this.graphics.clear();
+
+    // Mettre à jour le texte de la vie des coeurs
+    this.displayCoreAllyHealth.setText('Vie du coeur allié : ' + this.CoreAlly.hp);
+    this.displayCoreEnnemyHealth.setText('Vie du coeur ennemi : ' + this.CoreEnnemy.hp);
+
+    // Mettre à jour le texte du cooldown de l'IA et du joueur
+    this.displayUserTurretCooldown = this.add.text(16, 50, 'Cooldown Joueur : ' + (this.userCooldown > 0 ? this.userCooldown : 0) + 's', { fontSize: '32px', color: '#fff' });
+    this.displayAiTurretCooldown = this.add.text(1000, 50, 'Cooldown IA : ' + (this.aiCooldown > 0 ? this.aiCooldown : 0) + 's', { fontSize: '32px', color: '#fff' });
 
     // Ajoute la position actuelle du cercle aux points de trajectoire
     if (this.circle) {
@@ -424,14 +432,6 @@ export class MyScene extends Phaser.Scene {
   private onEvent() {
     this.aiCooldown--;
     this.userCooldown--;
-    // Mettre à jour le texte de la vie des coeurs
-    this.displayCoreAllyHealth.setText('Vie du coeur allié : ' + this.CoreAlly.hp);
-    this.displayCoreEnnemyHealth.setText('Vie du coeur ennemi : ' + this.CoreEnnemy.hp);
-
-    // Mettre à jour le texte du cooldown de l'IA et du joueur
-    this.displayUserTurretCooldown = this.add.text(16, 50, 'Cooldown Joueur : ' + (this.userCooldown > 0 ? this.userCooldown : 0) + 's', { fontSize: '32px', color: '#fff' });
-    this.displayAiTurretCooldown = this.add.text(1000, 50, 'Cooldown IA : ' + (this.aiCooldown > 0 ? this.aiCooldown : 0) + 's', { fontSize: '32px', color: '#fff' });
-
   }
 }
 
