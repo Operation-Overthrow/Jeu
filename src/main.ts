@@ -362,7 +362,7 @@ export class MyScene extends Phaser.Scene {
       score += VICTORY_BONUS;
     }
 
-    score += this.turrets.filter(turret => !turret.isEnemy).length * TURRET_BONUS;
+    score += this.turretService.turrets.filter(turret => !turret.isEnemy).length * TURRET_BONUS;
     score += this.CoreAlly.hp * HP_BONUS;
 
     return score;
