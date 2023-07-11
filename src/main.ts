@@ -184,8 +184,8 @@ export class MyScene extends Phaser.Scene {
     this.displayCoreEnnemyHealth.setText('Vie du coeur ennemi : ' + this.CoreEnnemy.hp);
 
     // Mettre à jour le texte du cooldown de l'IA et du joueur
-    this.displayUserTurretCooldown = this.add.text(16, 50, 'Cooldown Joueur : ' + (this.userCooldown > 0 ? this.userCooldown : 0) + 's', { fontSize: '32px', color: '#fff' });
-    this.displayAiTurretCooldown = this.add.text(1000, 50, 'Cooldown IA : ' + (this.aiCooldown > 0 ? this.aiCooldown : 0) + 's', { fontSize: '32px', color: '#fff' });
+    this.displayUserTurretCooldown.setText('Cooldown Joueur : ' + (this.userCooldown > 0 ? this.userCooldown : 0) + 's');
+    this.displayAiTurretCooldown.setText('Cooldown IA : ' + (this.aiCooldown > 0 ? this.aiCooldown : 0) + 's');
 
     // Ajoute la position actuelle du cercle aux points de trajectoire
     if (this.circle) {
