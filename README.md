@@ -13,7 +13,11 @@ git clone https://github.com/Operation-Overthrow/Jeu
 # 2. Créer le network docker si ce n'est pas déjà fait
 docker network create operation_overthrow_network
 
-# 3. Lancer le container docker
+# 3. Installer les dépendances npm
+
+npm install
+
+# 4. Lancer le container docker
 docker compose up -d
 ```
 
