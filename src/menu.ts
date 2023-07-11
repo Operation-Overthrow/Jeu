@@ -15,9 +15,13 @@ import { game } from './main';
         const gameWidth: number = Number(game.config.width);
         const gameHeight: number = Number(game.config.height);
         const startButton = this.add.rectangle(gameWidth / 2, gameHeight / 2, 200, 50, 0xffffff).setOrigin(0.5);
-        const buttonText = this.add.text(gameWidth / 2, gameHeight / 2, 'Démarrer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
-       
+        this.add.text(gameWidth / 2, gameHeight / 2, 'Démarrer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        
+        const howToPlayButton = this.add.rectangle(gameWidth / 2, gameHeight / 2 + 100, 250, 50, 0xffffff).setOrigin(0.5);
+        this.add.text(gameWidth / 2, gameHeight / 2 + 100, 'Comment jouer', { fontSize: '24px',color:'#000000'}).setOrigin(0.5);
+        
         startButton.setInteractive();
+        howToPlayButton.setInteractive();
 
         // Gérer les événements de la souris pour le bouton
         startButton.on('pointerover', () => {
@@ -31,6 +35,19 @@ import { game } from './main';
         startButton.on('pointerdown', () => {
             // Code à exécuter lorsque le bouton est cliqué
             this.scene.start('my-scene'); // Transition vers une autre scène (par exemple, la scène du jeu)
+        });
+
+        howToPlayButton.on('pointerover', () => {
+            howToPlayButton.setScale(1.1); // Augmenter l'échelle du bouton lors du survol
+        });
+
+        howToPlayButton.on('pointerout', () => {
+            howToPlayButton.setScale(1); // Rétablir l'échelle normale du bouton lorsque la souris quitte le bouton
+        });
+
+        howToPlayButton.on('pointerdown', () => {
+            // Code à exécuter lorsque le bouton est cliqué
+            this.scene.start('HowToScene'); // Transition vers une autre scène (par exemple, la scène du jeu)
         });
     }
 
